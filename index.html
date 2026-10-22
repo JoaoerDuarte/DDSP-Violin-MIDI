@@ -5,71 +5,108 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DDSP-Violin MIDI — Audio Examples</title>
 <style>
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    max-width: 900px;
-    margin: 2em auto;
-    padding: 0 1em;
-    color: #24292f;
-    line-height: 1.5;
-  }
-  h1 { margin-bottom: 0.2em; }
-  h1 + p { color: #57606a; margin-top: 0; }
-  table { border-collapse: collapse; width: 100%; margin: 1.5em 0; }
-  th, td { padding: 10px; border-bottom: 1px solid #d0d7de; text-align: left; vertical-align: middle; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         max-width: 960px; margin: 2em auto; padding: 0 1em; color: #24292f; line-height: 1.5; }
+  h1 { margin-bottom: 0.2em; }  h1 + p { color: #57606a; margin-top: 0; }
+  h2 { margin-top: 2.2em; border-bottom: 1px solid #d0d7de; padding-bottom: 0.2em; }
+  h3 { margin-top: 1.6em; font-size: 1.1em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0 1.5em; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid #d0d7de; text-align: left; vertical-align: middle; }
   th { background: #f6f8fa; font-weight: 600; font-size: 0.95em; }
-  audio { width: 150px; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  audio { width: 190px; }
   a { color: #0969da; }
-  h2 { margin-top: 2em; font-size: 1.15em; }
+  .note { color: #57606a; font-size: 0.95em; }
 </style>
 </head>
 <body>
 
-<h1>DDSP-Violin MIDI — Audio Examples</h1>
-<p>Companion page of the MIDI-controllable violin synthesiser (in preparation). First set: the original DDSP solo-instrument model and our model under the same recipe.</p>
+<h1>DDSP-Violin MIDI &mdash; Audio Examples</h1>
+<p>The original DDSP model and DDSP-Violin, trained with the same recipe on the same recordings.</p>
 
-<p>Every model synthesises the excerpt from its pitch and loudness curves (CREPE pitch, A-weighted loudness, 250 frames per second). Columns:</p>
-<ul>
-  <li><strong>DDSP, Garner / ev03</strong> — the original DDSP solo-instrument model (Engel et al., 2020; magenta/ddsp 3.7.0, published recipe, 50K steps), trained on the paper's 13-minute solo violin set (John Garner, Bach BWV 1002) or on one MOSA player (ev03, 36 minutes).</li>
-  <li><strong>Ours</strong> — DDSP-Violin (brightness and bow-position masks, residuals, body filter), trained with the same recipe on the same data; <em>room</em> adds the 3 s learned reverb of the original model; <em>full MOSA</em> is the 14-hour training split of 15 players.</li>
-</ul>
-<p>Levels matched to the recording.</p>
+<p>This page compares two synthesisers that turn a pitch curve and a loudness curve into violin sound: the
+<strong>DDSP</strong> solo-instrument model of Engel et al. (ICLR 2020), run with its published code and recipe, and
+<strong>DDSP-Violin</strong>, our physically-informed version of it. Both are trained on three datasets, and each model
+is played on the same excerpts, so that every row of a table is the same 20 s of music under each model.</p>
 
-<h2>Garner (the DDSP paper's solo violin): training data of the Garner models</h2>
+<h2>The models</h2>
+
+<h3>DDSP (original)</h3>
+<p>The solo-instrument autoencoder of the DDSP paper (<code>magenta/ddsp</code> 3.7.0, <code>solo_instrument.gin</code>):
+a decoder (three-layer MLPs on the pitch and the loudness, a 512-unit GRU, a 512-unit MLP) outputs, 250 times a second,
+an amplitude, the distribution over 60 harmonics and 65 noise-band magnitudes; a harmonic oscillator bank and a filtered
+noise source are summed and passed through a trainable 3 s reverb that stands for the body and the room together.
+Trained on the multi-scale spectral loss (L1 on the magnitude and on the log magnitude at six FFT sizes from 64 to 2048)
+with Adam at 3e-4 decaying by 0.98 every 10K steps, batch 32, 50K steps, as the published solo-violin checkpoint was.</p>
+
+<h3>DDSP-Violin (ours)</h3>
+<p>The same decoder and synthesis, with the harmonic source constrained by bowed-string acoustics: the harmonic
+levels follow a brightness tilt (one parameter, measured on the recording and given as a third input), the
+bow-position mask (notches at the harmonics of the bowing point; here the mask of the open position), and per-harmonic
+residuals limited to &plusmn;12 dB. The sum of harmonics and noise goes through a learned body filter (a 2048-tap
+impulse response); the <em>+ reverb</em> variant adds the same trainable 3 s reverb as the original model. Trained with
+the same loss, optimiser, batch size and number of steps as the original.</p>
+
+<h3>One parameter extraction</h3>
+<p>Both models receive 16 kHz audio cut into 4 s examples every second, the pitch from CREPE (the full model with
+Viterbi decoding; untracked frames filled from the nearest tracked one), and the A-weighted loudness over 512-sample
+windows, 250 frames per second. The DDSP rows of this first version were trained with the library's own feature
+extraction (the same CREPE and loudness, read by its own writer); the runs on the shared extraction are in progress
+and will replace them.</p>
+
+<h2>The datasets</h2>
 <table>
-<thead><tr><th>Excerpt</th><th>Recording</th><th>DDSP, Garner</th><th>DDSP, ev03</th><th>Ours, Garner</th><th>Ours, Garner, room</th><th>Ours, ev03</th><th>Ours, ev03, room</th><th>Ours, full MOSA</th></tr></thead>
+<thead><tr><th>Set</th><th>Content</th><th>Training audio</th><th>Players, rooms</th></tr></thead>
 <tbody>
-<tr><td>02 double</td><td><audio controls preload="none" src="audio_examples/garner_02_double/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_02_double/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_02_double/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_02_double/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_02_double/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_02_double/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_02_double/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_02_double/07_ours_full_noroom.mp3"></audio></td></tr>
-<tr><td>03 corrente</td><td><audio controls preload="none" src="audio_examples/garner_03_corrente/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03_corrente/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03_corrente/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03_corrente/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03_corrente/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03_corrente/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03_corrente/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03_corrente/07_ours_full_noroom.mp3"></audio></td></tr>
-<tr><td>04 double presto</td><td><audio controls preload="none" src="audio_examples/garner_04_double_presto/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04_double_presto/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04_double_presto/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04_double_presto/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04_double_presto/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04_double_presto/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04_double_presto/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04_double_presto/07_ours_full_noroom.mp3"></audio></td></tr>
-<tr><td>06 double</td><td><audio controls preload="none" src="audio_examples/garner_06_double/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_06_double/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_06_double/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_06_double/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_06_double/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_06_double/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_06_double/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_06_double/07_ours_full_noroom.mp3"></audio></td></tr>
-<tr><td>08 double</td><td><audio controls preload="none" src="audio_examples/garner_08_double/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_08_double/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_08_double/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_08_double/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_08_double/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_08_double/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_08_double/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_08_double/07_ours_full_noroom.mp3"></audio></td></tr>
+<tr><td>Solo violin (Garner)</td><td>The DDSP paper's set: J. S. Bach, Partita No. 1 BWV 1002, five movements played by
+John Garner (MusOpen, public domain), the data behind the paper's violin examples.</td><td class="n">13 min</td><td>1, 1</td></tr>
+<tr><td>MOSA, one player (ev03)</td><td>The violin takes of one violinist of the MOSA dataset (Huang et al., 2024), the one
+with the cleanest recordings; whole takes held out for evaluation.</td><td class="n">36 min</td><td>1, 1</td></tr>
+<tr><td>MOSA, all players</td><td>The violin takes of all fifteen MOSA violinists, recorded in two motion-capture studios
+(Edinburgh and Taipei); split by take, with whole takes held out.</td><td class="n">13.8 h</td><td>15, 2</td></tr>
 </tbody>
 </table>
-<h2>MOSA player ev03: training takes of the ev03 models</h2>
+<p class="note">Every excerpt is the same 4 s of a take or movement for every column. <em>Training</em> means the excerpt was in the
+model's training data (the condition of the original paper's examples); <em>held out</em> means it was not. Levels
+are matched to the recording. Training losses at the end of the 50K steps (the multi-scale spectral loss of each
+code base):</p>
 <table>
-<thead><tr><th>Excerpt</th><th>Recording</th><th>DDSP, Garner</th><th>DDSP, ev03</th><th>Ours, Garner</th><th>Ours, Garner, room</th><th>Ours, ev03</th><th>Ours, ev03, room</th><th>Ours, full MOSA</th></tr></thead>
+<thead><tr><th>Trained on</th><th>DDSP</th><th>DDSP-Violin</th><th>DDSP-Violin + reverb</th></tr></thead>
 <tbody>
-<tr><td>ba1 ev03 t1 00</td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_00/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_00/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_00/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_00/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_00/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_00/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_00/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_00/07_ours_full_noroom.mp3"></audio></td></tr>
-<tr><td>ba1 ev03 t1 01</td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_01/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_01/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_01/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_01/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_01/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_01/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_01/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train_ba1_ev03_t1_01/07_ours_full_noroom.mp3"></audio></td></tr>
+<tr><td>Solo violin (Garner)</td><td class="n">5.39</td><td class="n">5.02</td><td class="n">5.15</td></tr>
+<tr><td>MOSA, one player (ev03)</td><td class="n">6.21</td><td class="n">5.33</td><td class="n">5.40</td></tr>
+<tr><td>MOSA, all players</td><td class="n">6.46</td><td class="n">5.67</td><td class="n">5.83</td></tr>
 </tbody>
 </table>
-<h2>MOSA player ev03: held-out takes</h2>
+
+<h2>Audio examples</h2>
+
+<h3>Solo violin (Garner): the models trained on it, on their training data</h3>
+<p>Two movements of the training set itself: the condition of the original DDSP paper's examples, the model resynthesising what it was trained on.</p>
 <table>
-<thead><tr><th>Excerpt</th><th>Recording</th><th>DDSP, Garner</th><th>DDSP, ev03</th><th>Ours, Garner</th><th>Ours, Garner, room</th><th>Ours, ev03</th><th>Ours, ev03, room</th><th>Ours, full MOSA</th></tr></thead>
+<thead><tr><th>Excerpt</th><th>Recording</th><th>DDSP, Garner</th><th>DDSP-Violin, Garner</th><th>DDSP-Violin + reverb, Garner</th></tr></thead>
 <tbody>
-<tr><td>ba4 ev03 t2 00</td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_00/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_00/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_00/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_00/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_00/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_00/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_00/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_00/07_ours_full_noroom.mp3"></audio></td></tr>
-<tr><td>ba4 ev03 t2 01</td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_01/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_01/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_01/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_01/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_01/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_01/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_01/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_ba4_ev03_t2_01/07_ours_full_noroom.mp3"></audio></td></tr>
-<tr><td>de2 ev03 t2 00</td><td><audio controls preload="none" src="audio_examples/ev03_test_de2_ev03_t2_00/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_de2_ev03_t2_00/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_de2_ev03_t2_00/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_de2_ev03_t2_00/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_de2_ev03_t2_00/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_de2_ev03_t2_00/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_de2_ev03_t2_00/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_test_de2_ev03_t2_00/07_ours_full_noroom.mp3"></audio></td></tr>
+<tr><td>III. Corrente</td><td><audio controls preload="none" src="audio_examples/garner_03/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03/ddsp_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03/ddsp_violin_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03/ddsp_violin_reverb_garner.mp3"></audio></td></tr>
+<tr><td>IV. Double (Presto)</td><td><audio controls preload="none" src="audio_examples/garner_04/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04/ddsp_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04/ddsp_violin_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04/ddsp_violin_reverb_garner.mp3"></audio></td></tr>
 </tbody>
 </table>
-<h2>MOSA passages (other players)</h2>
+<h3>MOSA, one player (ev03): the models trained on it</h3>
+<p>One excerpt from a training take of the player and one from a take held out of training.</p>
 <table>
-<thead><tr><th>Excerpt</th><th>Recording</th><th>DDSP, Garner</th><th>DDSP, ev03</th><th>Ours, Garner</th><th>Ours, Garner, room</th><th>Ours, ev03</th><th>Ours, ev03, room</th><th>Ours, full MOSA</th></tr></thead>
+<thead><tr><th>Excerpt</th><th>Recording</th><th>DDSP, ev03</th><th>DDSP-Violin, ev03</th><th>DDSP-Violin + reverb, ev03</th></tr></thead>
 <tbody>
-<tr><td>ba1 ev01 t2 00</td><td><audio controls preload="none" src="audio_examples/passage_ba1_ev01_t2_00/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_ba1_ev01_t2_00/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_ba1_ev01_t2_00/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_ba1_ev01_t2_00/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_ba1_ev01_t2_00/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_ba1_ev01_t2_00/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_ba1_ev01_t2_00/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_ba1_ev01_t2_00/07_ours_full_noroom.mp3"></audio></td></tr>
-<tr><td>de2 yv02 t3 00</td><td><audio controls preload="none" src="audio_examples/passage_de2_yv02_t3_00/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_de2_yv02_t3_00/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_de2_yv02_t3_00/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_de2_yv02_t3_00/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_de2_yv02_t3_00/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_de2_yv02_t3_00/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_de2_yv02_t3_00/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_de2_yv02_t3_00/07_ours_full_noroom.mp3"></audio></td></tr>
-<tr><td>mo5 yv10 t3 01</td><td><audio controls preload="none" src="audio_examples/passage_mo5_yv10_t3_01/00_recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_mo5_yv10_t3_01/01_their_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_mo5_yv10_t3_01/02_their_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_mo5_yv10_t3_01/03_ours_garner_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_mo5_yv10_t3_01/04_ours_garner_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_mo5_yv10_t3_01/05_ours_ev03_noroom.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_mo5_yv10_t3_01/06_ours_ev03_room.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/passage_mo5_yv10_t3_01/07_ours_full_noroom.mp3"></audio></td></tr>
+<tr><td>Bach piece 1, take 1, part 1 (training)</td><td><audio controls preload="none" src="audio_examples/ev03_tr1/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_tr1/ddsp_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_tr1/ddsp_violin_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_tr1/ddsp_violin_reverb_ev03.mp3"></audio></td></tr>
+<tr><td>Bach piece 4, take 2, part 1 (held out)</td><td><audio controls preload="none" src="audio_examples/ev03_te1/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_te1/ddsp_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_te1/ddsp_violin_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_te1/ddsp_violin_reverb_ev03.mp3"></audio></td></tr>
+</tbody>
+</table>
+<h3>MOSA, all players: the models trained on the full set</h3>
+<p>Held-out takes of three players.</p>
+<table>
+<thead><tr><th>Excerpt</th><th>Recording</th><th>DDSP, MOSA</th><th>DDSP-Violin, MOSA</th><th>DDSP-Violin + reverb, MOSA</th></tr></thead>
+<tbody>
+<tr><td>Bach piece 4, take 2, part 1 (held out)</td><td><audio controls preload="none" src="audio_examples/ev03_te1/recording.mp3"></audio></td><td class="note">to come</td><td><audio controls preload="none" src="audio_examples/ev03_te1/ddsp_violin_mosa.mp3"></audio></td><td class="note">to come</td></tr>
+<tr><td>Player ev01, Bach piece 1 (held out)</td><td><audio controls preload="none" src="audio_examples/pass_1/recording.mp3"></audio></td><td class="note">to come</td><td><audio controls preload="none" src="audio_examples/pass_1/ddsp_violin_mosa.mp3"></audio></td><td class="note">to come</td></tr>
+<tr><td>Player yv02, piece de2 (held out)</td><td><audio controls preload="none" src="audio_examples/pass_2/recording.mp3"></audio></td><td class="note">to come</td><td><audio controls preload="none" src="audio_examples/pass_2/ddsp_violin_mosa.mp3"></audio></td><td class="note">to come</td></tr>
 </tbody>
 </table>
 
