@@ -3,112 +3,128 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DDSP-Violin MIDI — Audio Examples</title>
+<title>DDSP-Violin MIDI — Audio examples</title>
 <style>
+  :root { --ddsp: #b45309; --ddsp-bg: #fff7ed; --ours: #1d4ed8; --ours-bg: #eff6ff; --room: #0f766e; --room-bg: #f0fdfa;
+          --rec: #374151; --rec-bg: #f3f4f6; --line: #d0d7de; --muted: #57606a; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-         max-width: 960px; margin: 2em auto; padding: 0 1em; color: #24292f; line-height: 1.5; }
-  h1 { margin-bottom: 0.2em; }  h1 + p { color: #57606a; margin-top: 0; }
-  h2 { margin-top: 2.2em; border-bottom: 1px solid #d0d7de; padding-bottom: 0.2em; }
-  h3 { margin-top: 1.6em; font-size: 1.1em; }
-  table { border-collapse: collapse; width: 100%; margin: 1em 0 1.5em; }
-  th, td { padding: 8px 10px; border-bottom: 1px solid #d0d7de; text-align: left; vertical-align: middle; }
-  th { background: #f6f8fa; font-weight: 600; font-size: 0.95em; }
-  td.n { text-align: right; font-variant-numeric: tabular-nums; }
-  audio { width: 190px; }
+         max-width: 980px; margin: 2em auto; padding: 0 1em; color: #24292f; line-height: 1.5; }
+  h1 { margin-bottom: 0.2em; }  h1 + p { color: var(--muted); margin-top: 0; }
+  h2 { margin-top: 2.2em; border-bottom: 1px solid var(--line); padding-bottom: 0.2em; }
+  h3 { margin-top: 1.4em; font-size: 1.05em; }
+  table { border-collapse: collapse; width: 100%; margin: 0.8em 0 1.4em; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+  th { font-weight: 600; font-size: 0.95em; background: #f6f8fa; }
+  th.ddsp { color: var(--ddsp); background: var(--ddsp-bg); }  th.ours { color: var(--ours); background: var(--ours-bg); }
+  th.room { color: var(--room); background: var(--room-bg); }  th.rec { color: var(--rec); background: var(--rec-bg); }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }  tr.loss td { background: #fafbfc; font-size: 0.95em; }
+  audio { width: 180px; }
   a { color: #0969da; }
-  .note { color: #57606a; font-size: 0.95em; }
+  .muted { color: var(--muted); font-size: 0.95em; }
+  .badge { display: inline-block; font-size: 0.75em; padding: 1px 7px; border-radius: 9px; margin-left: 6px; vertical-align: middle; }
+  .badge.train { background: #fef3c7; color: #92400e; }  .badge.held { background: #dcfce7; color: #166534; }
+  .model { border-left: 4px solid var(--line); padding: 0.2em 1em; margin: 1em 0; }
+  .model.ddsp { border-color: var(--ddsp); }  .model.ours { border-color: var(--ours); }
+  details { margin: 0.5em 0 1em; }  summary { cursor: pointer; color: #0969da; }
+  details img { max-width: 100%; margin-top: 0.6em; border: 1px solid var(--line); }
+  ul { margin-top: 0.3em; }  li { margin: 0.15em 0; }
 </style>
 </head>
 <body>
 
-<h1>DDSP-Violin MIDI &mdash; Audio Examples</h1>
-<p>The original DDSP model and DDSP-Violin, trained with the same recipe on the same recordings.</p>
+<h1>DDSP-Violin MIDI &mdash; Audio examples</h1>
+<p>Listening comparisons of the models in the MIDI studies.</p>
 
-<p>This page compares two synthesisers that turn a pitch curve and a loudness curve into violin sound: the
-<strong>DDSP</strong> solo-instrument model of Engel et al. (ICLR 2020), run with its published code and recipe, and
-<strong>DDSP-Violin</strong>, our physically-informed version of it. Both are trained on three datasets, and each model
-is played on the same excerpts, so that every row of a table is the same 20 s of music under each model.</p>
+<p>First set: the original DDSP model against DDSP-Violin, trained with the same recipe on the same recordings.
+Every row of a results table is the same 5 s of the same take under each model.
+<span class="badge train">training</span> marks an excerpt the models were trained on (the condition of the original
+DDSP examples), <span class="badge held">held out</span> one they never saw.</p>
 
-<h2>The models</h2>
+<h2>Models</h2>
 
-<h3>DDSP (original)</h3>
-<p>The solo-instrument autoencoder of the DDSP paper (<code>magenta/ddsp</code> 3.7.0, <code>solo_instrument.gin</code>):
-a decoder (three-layer MLPs on the pitch and the loudness, a 512-unit GRU, a 512-unit MLP) outputs, 250 times a second,
-an amplitude, the distribution over 60 harmonics and 65 noise-band magnitudes; a harmonic oscillator bank and a filtered
-noise source are summed and passed through a trainable 3 s reverb that stands for the body and the room together.
-Trained on the multi-scale spectral loss (L1 on the magnitude and on the log magnitude at six FFT sizes from 64 to 2048)
-with Adam at 3e-4 decaying by 0.98 every 10K steps, batch 32, 50K steps, as the published solo-violin checkpoint was.</p>
+<div class="model ddsp">
+<h3>DDSP</h3>
+<p>The solo-instrument model of Engel et al. (<a href="https://arxiv.org/abs/2001.04643">ICLR 2020</a>), run with
+the published code (<a href="https://github.com/magenta/ddsp">magenta/ddsp</a> 3.7.0, <code>solo_instrument.gin</code>):
+a decoder from pitch and loudness to an amplitude, 60 harmonics and 65 noise bands, a harmonic oscillator bank
+and filtered noise, then a trainable 3 s reverb that stands for the body and the room. Loss: multi-scale
+spectral (six FFT sizes); Adam 3e-4 decaying 0.98 per 10K steps, batch 32, 50K steps, as the published checkpoint.</p>
+<details><summary>Diagram</summary><img src="assets/ddsp_architecture.png" alt="DDSP autoencoder">
+<p class="muted">From Engel et al. (2020). The Z encoder (dashed) is not used by the solo-instrument model.</p></details>
+</div>
 
-<h3>DDSP-Violin (ours)</h3>
-<p>The same decoder and synthesis, with the harmonic source constrained by bowed-string acoustics: the harmonic
-levels follow a brightness tilt (one parameter, measured on the recording and given as a third input), the
-bow-position mask (notches at the harmonics of the bowing point; here the mask of the open position), and per-harmonic
-residuals limited to &plusmn;12 dB. The sum of harmonics and noise goes through a learned body filter (a 2048-tap
-impulse response); the <em>+ reverb</em> variant adds the same trainable 3 s reverb as the original model. Trained with
-the same loss, optimiser, batch size and number of steps as the original.</p>
+<div class="model ours">
+<h3>DDSP-Violin</h3>
+<p>Our physically-informed version (<a href="https://github.com/JoaoerDuarte/DDSP-Violin-EUSIPCO2026">code</a>,
+EUSIPCO 2026): the same decoder and synthesis, with the harmonic levels constrained by a brightness tilt
+(&alpha;, measured on the recording and given as a third input), the bow-position mask (here the open position)
+and per-harmonic residuals within &plusmn;12 dB, followed by a learned body filter (2048 taps). Trained with the
+same loss, optimiser, batch size and steps as DDSP.
+<strong>DDSP-Violin + room reverb</strong> adds, after the body filter, the same trainable 3 s reverb as DDSP.</p>
+<details><summary>Diagram</summary><img src="assets/ddsp_violin_architecture.png" alt="DDSP-Violin">
+<p class="muted">The Z encoder is not used here: &alpha; comes from the recording, &beta; and &gamma; are fixed.</p></details>
+</div>
 
-<h3>One parameter extraction</h3>
-<p>Both models receive 16 kHz audio cut into 4 s examples every second, the pitch from CREPE (the full model with
-Viterbi decoding; untracked frames filled from the nearest tracked one), and the A-weighted loudness over 512-sample
-windows, 250 frames per second. The DDSP rows of this first version were trained with the library's own feature
-extraction (the same CREPE and loudness, read by its own writer); the runs on the shared extraction are in progress
-and will replace them.</p>
+<h2>Preprocessing</h2>
+<p>One extraction for both models:</p>
+<ul>
+  <li>Audio at 16 kHz mono, one gain per dataset; 4 s training examples cut every second.</li>
+  <li>Pitch: CREPE (full model, Viterbi decoding), 250 frames per second; untracked frames filled from the nearest tracked frame.</li>
+  <li>Loudness: A-weighted power over 512-sample windows, in dB.</li>
+  <li>DDSP-Violin also receives the brightness &alpha; measured per frame on the harmonic amplitudes.</li>
+</ul>
+<p class="muted">The DDSP rows of this version were trained with the library's own extraction of the same features
+(its CREPE and loudness, raw audio level); the runs on the shared extraction replace them when they finish.</p>
 
-<h2>The datasets</h2>
+<h2>Datasets</h2>
 <table>
-<thead><tr><th>Set</th><th>Content</th><th>Training audio</th><th>Players, rooms</th></tr></thead>
+<thead><tr><th>Set</th><th>Content</th><th>Training audio</th><th>Players</th><th>Rooms</th></tr></thead>
 <tbody>
-<tr><td>Solo violin (Garner)</td><td>The DDSP paper's set: J. S. Bach, Partita No. 1 BWV 1002, five movements played by
-John Garner (MusOpen, public domain), the data behind the paper's violin examples.</td><td class="n">13 min</td><td>1, 1</td></tr>
-<tr><td>MOSA, one player (ev03)</td><td>The violin takes of one violinist of the MOSA dataset (Huang et al., 2024), the one
-with the cleanest recordings; whole takes held out for evaluation.</td><td class="n">36 min</td><td>1, 1</td></tr>
-<tr><td>MOSA, all players</td><td>The violin takes of all fifteen MOSA violinists, recorded in two motion-capture studios
-(Edinburgh and Taipei); split by take, with whole takes held out.</td><td class="n">13.8 h</td><td>15, 2</td></tr>
+<tr><td>Solo violin (Garner)</td><td>The DDSP paper's set: Bach, Partita No. 1 BWV 1002, five movements played by John Garner
+(<a href="https://musopen.org/music/13574-violin-partita-no-1-bwv-1002/">MusOpen</a>, public domain).</td><td class="n">13 min</td><td class="n">1</td><td class="n">1</td></tr>
+<tr><td>MOSA, one player (ev03)</td><td>The violin takes of one player of the MOSA dataset
+(<a href="https://arxiv.org/abs/2406.06375">Huang et al., 2024</a>; <a href="https://github.com/yufenhuang/MOSA-Music-mOtion-and-Semantic-Annotation-dataset">data</a>),
+the one with the cleanest recordings; whole takes held out.</td><td class="n">36 min</td><td class="n">1</td><td class="n">1</td></tr>
+<tr><td>MOSA, all players</td><td>The violin takes of all fifteen MOSA players, two motion-capture studios; split by take, whole takes held out.</td><td class="n">13.8 h</td><td class="n">15</td><td class="n">2</td></tr>
 </tbody>
 </table>
-<p class="note">Every excerpt is the same 4 s of a take or movement for every column. <em>Training</em> means the excerpt was in the
-model's training data (the condition of the original paper's examples); <em>held out</em> means it was not. Levels
-are matched to the recording. Training losses at the end of the 50K steps (the multi-scale spectral loss of each
-code base):</p>
+
+<h2>Results</h2>
+<p>Audio, then the training loss of each model after its 50K steps (the multi-scale spectral loss, lower is
+better, computed by each code base on its own training examples). Levels matched to the recording.</p>
+
+<h3>Trained on the solo violin set (Garner)</h3>
 <table>
-<thead><tr><th>Trained on</th><th>DDSP</th><th>DDSP-Violin</th><th>DDSP-Violin + reverb</th></tr></thead>
+<thead><tr><th>Excerpt</th><th class="rec">Recording</th><th class="ddsp">DDSP</th><th class="ours">DDSP-Violin</th><th class="room">DDSP-Violin + room reverb</th></tr></thead>
 <tbody>
-<tr><td>Solo violin (Garner)</td><td class="n">5.39</td><td class="n">5.02</td><td class="n">5.15</td></tr>
-<tr><td>MOSA, one player (ev03)</td><td class="n">6.21</td><td class="n">5.33</td><td class="n">5.40</td></tr>
-<tr><td>MOSA, all players</td><td class="n">6.46</td><td class="n">5.67</td><td class="n">5.83</td></tr>
+<tr><td>Corrente<span class="badge train">training</span></td><td><audio controls preload="none" src="audio_examples/garner_corrente/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_corrente/ddsp_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_corrente/ddsp_violin_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_corrente/ddsp_violin_room_reverb_garner.mp3"></audio></td></tr>
+<tr><td>Double (VI)<span class="badge train">training</span></td><td><audio controls preload="none" src="audio_examples/garner_double6/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_double6/ddsp_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_double6/ddsp_violin_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_double6/ddsp_violin_room_reverb_garner.mp3"></audio></td></tr>
+<tr class="loss"><td>Training loss, 50K steps</td><td></td><td class="n">5.39</td><td class="n">5.02</td><td class="n">5.15</td></tr>
+</tbody>
+</table>
+<h3>Trained on one MOSA player (ev03)</h3>
+<table>
+<thead><tr><th>Excerpt</th><th class="rec">Recording</th><th class="ddsp">DDSP</th><th class="ours">DDSP-Violin</th><th class="room">DDSP-Violin + room reverb</th></tr></thead>
+<tbody>
+<tr><td>ev03, Bach, take 1<span class="badge train">training</span></td><td><audio controls preload="none" src="audio_examples/ev03_train/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train/ddsp_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train/ddsp_violin_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_train/ddsp_violin_room_reverb_ev03.mp3"></audio></td></tr>
+<tr><td>ev03, Bach, take 2<span class="badge held">held out</span></td><td><audio controls preload="none" src="audio_examples/ev03_heldout/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_heldout/ddsp_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_heldout/ddsp_violin_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_heldout/ddsp_violin_room_reverb_ev03.mp3"></audio></td></tr>
+<tr class="loss"><td>Training loss, 50K steps</td><td></td><td class="n">6.21</td><td class="n">5.33</td><td class="n">5.40</td></tr>
+</tbody>
+</table>
+<h3>Trained on all MOSA players</h3>
+<table>
+<thead><tr><th>Excerpt</th><th class="rec">Recording</th><th class="ddsp">DDSP</th><th class="ours">DDSP-Violin</th><th class="room">DDSP-Violin + room reverb</th></tr></thead>
+<tbody>
+<tr><td>ev03, piece de2<span class="badge held">held out</span></td><td><audio controls preload="none" src="audio_examples/ev03_heldout2/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_heldout2/ddsp_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_heldout2/ddsp_violin_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_heldout2/ddsp_violin_room_reverb_mosa.mp3"></audio></td></tr>
+<tr><td>ev01, Bach<span class="badge held">held out</span></td><td><audio controls preload="none" src="audio_examples/ev01_heldout/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev01_heldout/ddsp_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev01_heldout/ddsp_violin_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev01_heldout/ddsp_violin_room_reverb_mosa.mp3"></audio></td></tr>
+<tr><td>yv10, piece mo5<span class="badge held">held out</span></td><td><audio controls preload="none" src="audio_examples/yv10_heldout/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/yv10_heldout/ddsp_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/yv10_heldout/ddsp_violin_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/yv10_heldout/ddsp_violin_room_reverb_mosa.mp3"></audio></td></tr>
+<tr class="loss"><td>Training loss, 50K steps</td><td></td><td class="n">6.46</td><td class="n">5.67</td><td class="n">5.83</td></tr>
 </tbody>
 </table>
 
-<h2>Audio examples</h2>
-
-<h3>Solo violin (Garner): the models trained on it, on their training data</h3>
-<p>Two movements of the training set itself: the condition of the original DDSP paper's examples, the model resynthesising what it was trained on.</p>
-<table>
-<thead><tr><th>Excerpt</th><th>Recording</th><th>DDSP, Garner</th><th>DDSP-Violin, Garner</th><th>DDSP-Violin + reverb, Garner</th></tr></thead>
-<tbody>
-<tr><td>III. Corrente</td><td><audio controls preload="none" src="audio_examples/garner_03/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03/ddsp_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03/ddsp_violin_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_03/ddsp_violin_reverb_garner.mp3"></audio></td></tr>
-<tr><td>IV. Double (Presto)</td><td><audio controls preload="none" src="audio_examples/garner_04/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04/ddsp_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04/ddsp_violin_garner.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/garner_04/ddsp_violin_reverb_garner.mp3"></audio></td></tr>
-</tbody>
-</table>
-<h3>MOSA, one player (ev03): the models trained on it</h3>
-<p>One excerpt from a training take of the player and one from a take held out of training.</p>
-<table>
-<thead><tr><th>Excerpt</th><th>Recording</th><th>DDSP, ev03</th><th>DDSP-Violin, ev03</th><th>DDSP-Violin + reverb, ev03</th></tr></thead>
-<tbody>
-<tr><td>Bach piece 1, take 1, part 1 (training)</td><td><audio controls preload="none" src="audio_examples/ev03_tr1/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_tr1/ddsp_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_tr1/ddsp_violin_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_tr1/ddsp_violin_reverb_ev03.mp3"></audio></td></tr>
-<tr><td>Bach piece 4, take 2, part 1 (held out)</td><td><audio controls preload="none" src="audio_examples/ev03_te1/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_te1/ddsp_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_te1/ddsp_violin_ev03.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_te1/ddsp_violin_reverb_ev03.mp3"></audio></td></tr>
-</tbody>
-</table>
-<h3>MOSA, all players: the models trained on the full set</h3>
-<p>Held-out takes of three players.</p>
-<table>
-<thead><tr><th>Excerpt</th><th>Recording</th><th>DDSP, MOSA</th><th>DDSP-Violin, MOSA</th><th>DDSP-Violin + reverb, MOSA</th></tr></thead>
-<tbody>
-<tr><td>Bach piece 4, take 2, part 1 (held out)</td><td><audio controls preload="none" src="audio_examples/ev03_te1/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_te1/ddsp_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_te1/ddsp_violin_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/ev03_te1/ddsp_violin_reverb_mosa.mp3"></audio></td></tr>
-<tr><td>Player ev01, Bach piece 1 (held out)</td><td><audio controls preload="none" src="audio_examples/pass_1/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/pass_1/ddsp_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/pass_1/ddsp_violin_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/pass_1/ddsp_violin_reverb_mosa.mp3"></audio></td></tr>
-<tr><td>Player yv02, piece de2 (held out)</td><td><audio controls preload="none" src="audio_examples/pass_2/recording.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/pass_2/ddsp_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/pass_2/ddsp_violin_mosa.mp3"></audio></td><td><audio controls preload="none" src="audio_examples/pass_2/ddsp_violin_reverb_mosa.mp3"></audio></td></tr>
-</tbody>
-</table>
+<h2>Next</h2>
+<p>Same page, more sets: the models on the shared extraction, longer trainings, and the synthesiser of the
+MIDI studies (from curves to audio, without the Z encoder).</p>
 
 </body>
 </html>
