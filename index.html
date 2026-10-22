@@ -17,8 +17,11 @@
   th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: center; vertical-align: middle; }
   th { font-weight: 600; background: #f8fafc; }
   th:first-child, td:first-child { text-align: left; white-space: nowrap; }
-  th.ddsp { color: var(--ddsp); background: var(--ddsp-bg); }  th.ours { color: var(--ours); background: var(--ours-bg); }
-  th.room { color: var(--room); background: var(--room-bg); }  th.rec { color: var(--rec); background: var(--rec-bg); }
+  td.m { font-weight: 600; border-left: 4px solid var(--line2); }
+  tr.ddsp td.m { color: var(--ddsp); border-left-color: var(--ddsp); }  tr.ddsp2 td.m { color: var(--ddsp); border-left-color: #fdba74; }
+  tr.ours td.m { color: var(--ours); border-left-color: var(--ours); }  tr.ours2 td.m { color: var(--ours); border-left-color: #93c5fd; }
+  tr.rec td.m { color: var(--rec); border-left-color: var(--line2); }
+  th.ex { text-align: center; }
   td.sep, th.sep { border-left: 1px solid var(--line2); }
   tr.loss td { background: #f8fafc; color: #374151; font-variant-numeric: tabular-nums; }
   table.info th, table.info td { text-align: left; }  table.info td.n { text-align: right; font-variant-numeric: tabular-nums; }
@@ -48,35 +51,37 @@
 <p>First set: the original DDSP model against DDSP-Violin, trained the same way on the same recordings.</p>
 
 <h2>Models</h2>
+<p>Both read the audio they resynthesise: DDSP through its z encoder, DDSP-Violin through its harmonic encoder.</p>
 
 <div class="model ddsp">
 <h3>DDSP</h3>
-<p>The solo-instrument model of Engel et al. (<a href="https://arxiv.org/abs/2001.04643">ICLR 2020</a>), run with the
-published code (<a href="https://github.com/magenta/ddsp">magenta/ddsp</a> 3.7.0, <code>solo_instrument.gin</code>).</p>
+<p>The model of Engel et al. (<a href="https://arxiv.org/abs/2001.04643">ICLR 2020</a>), run with the published code
+(<a href="https://github.com/magenta/ddsp">magenta/ddsp</a> 3.7.0, <code>solo_instrument.gin</code>).</p>
 <ul>
-  <li>Inputs: pitch and loudness. No Z encoder.</li>
+  <li>Inputs: pitch and loudness. <strong>DDSP + z</strong> adds the z encoder (MFCC, GRU 512, 16 values at 125 frames per 4 s).</li>
   <li>Decoder: one 3-layer MLP (512) per input, GRU (512), 3-layer MLP (512).</li>
   <li>Outputs per frame: amplitude, 60 harmonic amplitudes, 65 noise-band magnitudes.</li>
   <li>Synthesis: harmonic oscillator bank plus filtered noise.</li>
   <li>Reverb: trainable, 3 s (48,000 samples), on the sum of harmonics and noise, dry signal added. No body filter.</li>
 </ul>
 <details><summary>Diagram</summary><img src="assets/ddsp_architecture.png" alt="DDSP autoencoder">
-<p class="muted">From Engel et al. (2020). The Z encoder (dashed) is not used by the solo-instrument model.</p></details>
+<p class="muted">From Engel et al. (2020).</p></details>
 </div>
 
 <div class="model ours">
 <h3>DDSP-Violin</h3>
-<p>Our physically-informed version (<a href="https://github.com/JoaoerDuarte/DDSP-Violin-EUSIPCO2026">code</a>, EUSIPCO 2026).</p>
+<p>The model of our AES 2026 paper (<a href="https://github.com/JoaoerDuarte/DDSP-Violin-AES2026">code</a>).</p>
 <ul>
-  <li>Inputs: pitch, loudness and brightness &alpha;. No Z encoder.</li>
+  <li>Inputs: pitch, loudness and the harmonic amplitudes of the audio, read by the harmonic encoder into z&#8322;.
+      <strong>+ z</strong> adds the main z encoder as in the paper.</li>
+  <li>From z&#8322;: the brightness &alpha; and the bow position k, fed to the decoder and to the masks.</li>
   <li>Decoder: as DDSP.</li>
-  <li>Outputs per frame: amplitude, 60 per-harmonic residuals (within &plusmn;12 dB), 65 noise-band magnitudes.</li>
-  <li>Bow-position mask: open position.</li>
+  <li>Outputs per frame: amplitude, 60 per-harmonic residuals (within &plusmn;6 dB), 65 noise-band magnitudes.</li>
   <li>Body filter: learned, 2,048 samples, on the harmonic part.</li>
-  <li><strong>DDSP-Violin + room reverb</strong>: the same trainable 3 s reverb as DDSP, on the sum of the filtered harmonics and the noise.</li>
+  <li>Residual loss at weight 0.3.</li>
+  <li><strong>+ room reverb</strong>: the same trainable 3 s reverb as DDSP, on the sum of the filtered harmonics and the noise.</li>
 </ul>
-<details><summary>Diagram</summary><img src="assets/ddsp_violin_architecture.png" alt="DDSP-Violin">
-<p class="muted">The Z encoder is not used here: &alpha; comes from the recording, &beta; and &gamma; are fixed.</p></details>
+<details><summary>Diagram</summary><img src="assets/ddsp_violin_architecture.png" alt="DDSP-Violin"></details>
 </div>
 
 <h2>Datasets</h2>
@@ -97,10 +102,10 @@ published code (<a href="https://github.com/magenta/ddsp">magenta/ddsp</a> 3.7.0
   <li>Frame rate: 250 per second (4 ms).</li>
   <li>Pitch: CREPE (full model, Viterbi decoding). A frame without a tracked pitch takes the pitch of the nearest tracked frame.</li>
   <li>Loudness: A-weighted power over 512-sample windows, in dB.</li>
-  <li>Brightness &alpha; (DDSP-Violin only): fitted per frame to the harmonic amplitudes of the recording.</li>
+  <li>Harmonic amplitudes (DDSP-Violin only): the first 40 harmonics at the pitch, per frame.</li>
   <li>Training examples: 4 s windows cut every second.</li>
 </ul>
-<p class="muted">The DDSP rows of this version were trained with the library's own extraction of the same features
+<p class="muted">The DDSP rows shown so far were trained with the library's own extraction of the same features
 (its CREPE and loudness, raw audio level). The runs on the shared extraction replace them when they finish.</p>
 
 <h2>Training</h2>
@@ -111,38 +116,49 @@ published code (<a href="https://github.com/magenta/ddsp">magenta/ddsp</a> 3.7.0
   <li>Loss: multi-scale spectral, L1 on the magnitude and on the log magnitude, FFT sizes 2048, 1024, 512, 256, 128, 64.</li>
   <li>Optimiser: Adam, 3e-4 decaying by 0.98 every 10K steps, gradient clip 3.</li>
   <li>Batch 32, 50K steps, one model per dataset.</li>
-  <li>Extended trainings, same settings: 150K steps on ev03, 300K on all players. In progress.</li>
+  <li>Extended trainings on ev03 and all players, same settings, continued until the validation loss stops falling. In progress.</li>
 </ul>
 
 <h2>Results</h2>
-<p>Levels matched to the recording. The last row of each table is the model's training loss after 50K steps.</p>
+<p>Levels matched to the recording. The last column is the model's training loss after 50K steps.</p>
 
 <h3>Trained on the solo violin set (Garner)</h3>
 <table>
-<thead><tr><th>Excerpt</th><th class="rec">Recording</th><th class="ddsp sep">DDSP</th><th class="ours">DDSP-Violin</th><th class="room">DDSP-Violin + room reverb</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th>Training loss</th></tr></thead>
 <tbody>
-<tr><td>Double (II)<span class="badge train">training set</span></td><td><div class="player" data-src="audio_examples/garner_double2/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"><div class="player" data-src="audio_examples/garner_double2/ddsp_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_double2/ddsp_violin_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_double2/ddsp_violin_room_reverb_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td></tr>
-<tr><td>Corrente<span class="badge train">training set</span></td><td><div class="player" data-src="audio_examples/garner_corrente/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"><div class="player" data-src="audio_examples/garner_corrente/ddsp_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/ddsp_violin_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/ddsp_violin_room_reverb_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td></tr>
-<tr class="loss"><td>Training loss, 50K steps</td><td></td><td class=sep>5.39</td><td>5.02</td><td>5.15</td></tr>
+<tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/garner_double2/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td></td></tr>
+<tr class="ddsp"><td class="m">DDSP</td><td><div class="player" data-src="audio_examples/garner_double2/ddsp_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/ddsp_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.39</td></tr>
+<tr class="ddsp2"><td class="m">DDSP + z</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin + room reverb</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin + z</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin + z + room reverb</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
 </tbody>
 </table>
 <h3>Trained on one MOSA player (ev03)</h3>
 <table>
-<thead><tr><th>Excerpt</th><th class="rec">Recording</th><th class="ddsp sep">DDSP</th><th class="ours">DDSP-Violin</th><th class="room">DDSP-Violin + room reverb</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach, take 2<span class="badge test">test set</span></th><th>Training loss</th></tr></thead>
 <tbody>
-<tr><td>ev03, Bach, take 1<span class="badge train">training set</span></td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"><div class="player" data-src="audio_examples/ev03_train/ddsp_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td></tr>
-<tr><td>ev03, Bach, take 2<span class="badge test">test set</span></td><td><div class="player" data-src="audio_examples/ev03_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"><div class="player" data-src="audio_examples/ev03_test/ddsp_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td></tr>
-<tr class="loss"><td>Training loss, 50K steps</td><td></td><td class=sep>6.21</td><td>5.33</td><td>5.40</td></tr>
+<tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td></td></tr>
+<tr class="ddsp"><td class="m">DDSP</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.21</td></tr>
+<tr class="ddsp2"><td class="m">DDSP + z</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin + room reverb</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin + z</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin + z + room reverb</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
 </tbody>
 </table>
 <h3>Trained on all MOSA players</h3>
 <table>
-<thead><tr><th>Excerpt</th><th class="rec">Recording</th><th class="ddsp sep">DDSP</th><th class="ours">DDSP-Violin</th><th class="room">DDSP-Violin + room reverb</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach<span class="badge test">test set</span></th><th class="ex">yv02, piece de2<span class="badge test">test set</span></th><th>Training loss</th></tr></thead>
 <tbody>
-<tr><td>ev03, Bach, take 1<span class="badge train">training set</span></td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"><div class="player" data-src="audio_examples/ev03_train/ddsp_mosa.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_mosa.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_room_reverb_mosa.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td></tr>
-<tr><td>ev01, Bach<span class="badge test">test set</span></td><td><div class="player" data-src="audio_examples/ev01_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"><div class="player" data-src="audio_examples/ev01_test/ddsp_mosa.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_mosa.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_room_reverb_mosa.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td></tr>
-<tr><td>yv02, piece de2<span class="badge test">test set</span></td><td><div class="player" data-src="audio_examples/yv02_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"><div class="player" data-src="audio_examples/yv02_test/ddsp_mosa.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_mosa.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_room_reverb_mosa.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td></tr>
-<tr class="loss"><td>Training loss, 50K steps</td><td></td><td class=sep>6.46</td><td>5.67</td><td>5.83</td></tr>
+<tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td></td></tr>
+<tr class="ddsp"><td class="m">DDSP</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.46</td></tr>
+<tr class="ddsp2"><td class="m">DDSP + z</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin + room reverb</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin + z</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin + z + room reverb</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
 </tbody>
 </table>
 
