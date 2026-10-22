@@ -45,8 +45,7 @@
 <h1>DDSP-Violin MIDI &mdash; Audio examples</h1>
 <p>Listening comparisons of the models in the MIDI studies.</p>
 
-<p>First set: the original DDSP model against DDSP-Violin, trained with the same recipe on the same recordings.
-Every row of a results table is the same 10 s of the same take under each model.</p>
+<p>First set: the original DDSP model against DDSP-Violin, trained the same way on the same recordings.</p>
 
 <h2>Models</h2>
 
@@ -59,7 +58,7 @@ published code (<a href="https://github.com/magenta/ddsp">magenta/ddsp</a> 3.7.0
   <li>Decoder: one 3-layer MLP (512) per input, GRU (512), 3-layer MLP (512).</li>
   <li>Outputs per frame: amplitude, 60 harmonic amplitudes, 65 noise-band magnitudes.</li>
   <li>Synthesis: harmonic oscillator bank plus filtered noise.</li>
-  <li>Reverb: trainable, 3 s (48,000 taps), dry signal added. No body filter.</li>
+  <li>Reverb: trainable, 3 s (48,000 samples), on the sum of harmonics and noise, dry signal added. No body filter.</li>
 </ul>
 <details><summary>Diagram</summary><img src="assets/ddsp_architecture.png" alt="DDSP autoencoder">
 <p class="muted">From Engel et al. (2020). The Z encoder (dashed) is not used by the solo-instrument model.</p></details>
@@ -72,9 +71,9 @@ published code (<a href="https://github.com/magenta/ddsp">magenta/ddsp</a> 3.7.0
   <li>Inputs: pitch, loudness and brightness &alpha;. No Z encoder.</li>
   <li>Decoder: as DDSP.</li>
   <li>Outputs per frame: amplitude, 60 per-harmonic residuals (within &plusmn;12 dB), 65 noise-band magnitudes.</li>
-  <li>Harmonic levels: 1/n tilt by &alpha; &times; bow-position mask (open position) &times; residuals.</li>
-  <li>Synthesis: harmonic oscillator bank plus filtered noise, then a learned body filter (2,048 taps).</li>
-  <li><strong>DDSP-Violin + room reverb</strong>: the same trainable 3 s reverb as DDSP, after the body filter.</li>
+  <li>Bow-position mask: open position.</li>
+  <li>Body filter: learned, 2,048 samples, on the harmonic part.</li>
+  <li><strong>DDSP-Violin + room reverb</strong>: the same trainable 3 s reverb as DDSP, on the sum of the filtered harmonics and the noise.</li>
 </ul>
 <details><summary>Diagram</summary><img src="assets/ddsp_violin_architecture.png" alt="DDSP-Violin">
 <p class="muted">The Z encoder is not used here: &alpha; comes from the recording, &beta; and &gamma; are fixed.</p></details>
@@ -91,29 +90,27 @@ published code (<a href="https://github.com/magenta/ddsp">magenta/ddsp</a> 3.7.0
 <tr><td>MOSA, all players</td><td>The violin takes of all fifteen MOSA players, in two recording spaces.</td><td class="n">16.8 h</td><td class="n">15</td><td class="n">2</td></tr>
 </tbody>
 </table>
-<ul>
-  <li>Solo violin: all of it in training, as in the DDSP paper.</li>
-  <li>MOSA: split by take. Training set 13.8 h (36 min of ev03), test set of whole takes. The ev03 model sees the ev03 takes of each.</li>
-  <li>In the results, <span class="badge train">training set</span> and <span class="badge test">test set</span> mark where the excerpt comes from.</li>
-</ul>
 
 <h2>Preprocessing</h2>
 <ul>
   <li>Audio: 16 kHz mono, one gain per dataset.</li>
   <li>Frame rate: 250 per second (4 ms).</li>
-  <li>Pitch: CREPE (full model, Viterbi decoding); untracked frames filled from the nearest tracked frame.</li>
+  <li>Pitch: CREPE (full model, Viterbi decoding). A frame without a tracked pitch takes the pitch of the nearest tracked frame.</li>
   <li>Loudness: A-weighted power over 512-sample windows, in dB.</li>
-  <li>Brightness &alpha; (DDSP-Violin only): measured per frame on the harmonic amplitudes.</li>
+  <li>Brightness &alpha; (DDSP-Violin only): fitted per frame to the harmonic amplitudes of the recording.</li>
   <li>Training examples: 4 s windows cut every second.</li>
 </ul>
 <p class="muted">The DDSP rows of this version were trained with the library's own extraction of the same features
-(its CREPE and loudness, raw audio level); the runs on the shared extraction replace them when they finish.</p>
+(its CREPE and loudness, raw audio level). The runs on the shared extraction replace them when they finish.</p>
 
 <h2>Training</h2>
 <ul>
+  <li>Sets: solo violin, all in training, as in the DDSP paper. MOSA, a training set and a test set of full performance takes
+      (training 13.8 h, of which 36 min of ev03). In the results, <span class="badge train">training set</span> and
+      <span class="badge test">test set</span> mark where the excerpt comes from.</li>
   <li>Loss: multi-scale spectral, L1 on the magnitude and on the log magnitude, FFT sizes 2048, 1024, 512, 256, 128, 64.</li>
   <li>Optimiser: Adam, 3e-4 decaying by 0.98 every 10K steps, gradient clip 3.</li>
-  <li>Batch 32, 50K steps, one model per dataset: the recipe of the published DDSP solo-violin checkpoint.</li>
+  <li>Batch 32, 50K steps, one model per dataset, as the published DDSP solo-violin checkpoint.</li>
   <li>Extended trainings: 150K steps on ev03, 300K on all players, in progress.</li>
 </ul>
 
