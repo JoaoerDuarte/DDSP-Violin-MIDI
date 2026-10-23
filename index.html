@@ -51,7 +51,7 @@
 <p>First set: the original DDSP model against DDSP-Violin, trained the same way on the same recordings.</p>
 
 <h2>Models</h2>
-<p>Both read the audio they resynthesise: DDSP through its z encoder, DDSP-Violin through its harmonic encoder.</p>
+<p>Three models: DDSP, DDSP-Violin as published, and DDSP-Violin driven by curves.</p>
 
 <div class="model ddsp">
 <h3>DDSP</h3>
@@ -82,6 +82,18 @@
   <li><strong>+ room reverb</strong>: the same trainable 3 s reverb as DDSP, on the sum of the filtered harmonics and the noise.</li>
 </ul>
 <details><summary>Diagram</summary><img src="assets/ddsp_violin_architecture.png" alt="DDSP-Violin"></details>
+</div>
+
+<div class="model ours">
+<h3>DDSP-Violin from curves</h3>
+<p>The synthesiser of the MIDI studies: the same model driven by curves alone, nothing read from the audio at synthesis.</p>
+<ul>
+  <li>Inputs: pitch, loudness and the brightness &alpha;, measured per frame on the recording during training, and coming
+      from the score or the performance model at synthesis. No encoder.</li>
+  <li>k: not predicted; the bow mask stays at the open position.</li>
+  <li>Decoder, outputs, body filter, residual loss and the <strong>+ room reverb</strong> variant as above.</li>
+</ul>
+<details><summary>Diagram</summary><img src="assets/ddsp_violin_curves.svg" alt="DDSP-Violin from curves"></details>
 </div>
 
 <h2>Datasets</h2>
