@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DDSP-Violin MIDI: studies</title>
+<title>DDSP-Violin MIDI: the synthesiser</title>
 <style>
   :root { --ddsp: #9a3412; --ddsp-bg: #ffedd5; --ours: #1e40af; --ours-bg: #dbeafe; --room: #1e3a8a; --room-bg: #bfdbfe;
           --rec: #374151; --rec-bg: #f3f4f6; --line: #e5e7eb; --line2: #cbd5e1; --muted: #6b7280;
@@ -41,9 +41,10 @@
   details { margin: 0.4em 0 0.8em; }  summary { cursor: pointer; color: #1d4ed8; }
   details img { max-width: 100%; margin-top: 0.6em; border: 1px solid var(--line); }
   ul { margin-top: 0.3em; }  li { margin: 0.15em 0; }
-  section.study { margin-top: 2.6em; padding-top: 0.2em; border-top: 4px solid var(--band); }
-  section.study h2 { border-bottom: none; margin-top: 0.6em; color: var(--band); }
-  section.s1 { --band: #475569; }  section.s2 { --band: #0f766e; }  section.s3 { --band: #6d28d9; }
+  section.part { margin-top: 2.6em; padding-top: 0.2em; border-top: 4px solid var(--band); }
+  section.part h2 { border-bottom: none; margin-top: 0.6em; color: var(--band); }
+  section.p1 { --band: #475569; }  section.p2 { --band: #0f766e; }  section.p3 { --band: #6d28d9; }
+  section.part h3 { margin-top: 1.2em; }
   p.q { margin-top: -0.4em; font-style: italic; color: #374151; }
   p.note { color: var(--muted); font-size: 0.95em; }
   p.result { border-left: 4px solid var(--band); padding-left: 0.8em; }
@@ -52,56 +53,12 @@
 </head>
 <body>
 
-<h1>DDSP-Violin MIDI: studies</h1>
-<p>The synthesiser studies of the MIDI paper: models, data and training first, then one section per study with audio and losses.</p>
-
-<h2>Models</h2>
-<p>Three models: DDSP, DDSP-Violin as published, and DDSP-Violin driven by curves.</p>
-
-<div class="model ddsp">
-<h3>DDSP</h3>
-<p>The model of Engel et al. (<a href="https://arxiv.org/abs/2001.04643">ICLR 2020</a>), run with the published code
-(<a href="https://github.com/magenta/ddsp">magenta/ddsp</a> 3.7.0, <code>solo_instrument.gin</code>).</p>
-<ul>
-  <li>Inputs: pitch and loudness. <strong>DDSP + z</strong> adds the z encoder (MFCC, GRU 512, 16 values at 125 frames per 4 s).</li>
-  <li>Decoder: one 3-layer MLP (512) per input, GRU (512), 3-layer MLP (512).</li>
-  <li>Outputs per frame: amplitude, 60 harmonic amplitudes, 65 noise-band magnitudes.</li>
-  <li>Synthesis: harmonic oscillator bank plus filtered noise.</li>
-  <li>Reverb: trainable, 3 s (48,000 samples), on the sum of harmonics and noise, dry signal added. No body filter.</li>
-</ul>
-<details><summary>Diagram</summary><img src="assets/ddsp_architecture.png" alt="DDSP autoencoder">
-<p class="muted">From Engel et al. (2020).</p></details>
-</div>
-
-<div class="model ours">
-<h3>DDSP-Violin</h3>
-<p>The model of our AES 2026 paper (<a href="https://github.com/JoaoerDuarte/DDSP-Violin-AES2026">code</a>).</p>
-<ul>
-  <li>Inputs: pitch, loudness and the harmonic amplitudes of the audio, read by the harmonic encoder into z&#8322;.
-      <strong>+ z</strong> adds the main z encoder as in the paper.</li>
-  <li>From z&#8322;: the brightness &alpha; and the bow position k, fed to the decoder and to the masks.</li>
-  <li>Decoder: as DDSP.</li>
-  <li>Outputs per frame: amplitude, 60 per-harmonic residuals (within &plusmn;6 dB), 65 noise-band magnitudes.</li>
-  <li>Body filter: learned, 2,048 samples, on the harmonic part.</li>
-  <li>Residual loss at weight 0.3.</li>
-  <li><strong>+ room reverb</strong>: the same trainable 3 s reverb as DDSP, on the sum of the filtered harmonics and the noise.</li>
-</ul>
-<details><summary>Diagram</summary><img src="assets/ddsp_violin_architecture.png" alt="DDSP-Violin"></details>
-</div>
-
-<div class="model ours">
-<h3>DDSP-Violin from curves</h3>
-<p>The synthesiser of the MIDI studies: the same model driven by curves alone, nothing read from the audio at synthesis.</p>
-<ul>
-  <li>Inputs: pitch, loudness and the brightness &alpha;, measured per frame on the recording during training, and coming
-      from the score or the performance model at synthesis. No encoder.</li>
-  <li>k: not predicted; the bow mask stays at the open position.</li>
-  <li>Decoder, outputs, body filter, residual loss and the <strong>+ room reverb</strong> variant as above.</li>
-</ul>
-<details><summary>Diagram</summary><img src="assets/ddsp_violin_curves.svg" alt="DDSP-Violin from curves"></details>
-</div>
+<h1>DDSP-Violin MIDI: the synthesiser</h1>
+<p>Data, preprocessing and training shared by every part first, then one part per question with its models, audio and losses.</p>
 
 <h2>Datasets</h2>
+<p>The solo violin set is all training, as in the DDSP paper. The MOSA sets have a training set, a validation set and a test set
+of whole takes (training 13.8 h, of which 36 min of ev03).</p>
 <table class="info">
 <thead><tr><th>Set</th><th>Content</th><th>Audio</th><th>Players</th><th>Rooms</th></tr></thead>
 <tbody>
@@ -125,13 +82,9 @@
 
 <h2>Training</h2>
 <ul>
-  <li>Sets: solo violin, all in training, as in the DDSP paper. MOSA, a training set and a test set of full performance takes
-      (training 13.8 h, of which 36 min of ev03). In the results, <span class="badge train">training set</span> and
-      <span class="badge test">test set</span> mark where the excerpt comes from.</li>
   <li>Loss: multi-scale spectral, L1 on the magnitude and on the log magnitude, FFT sizes 2048, 1024, 512, 256, 128, 64.</li>
   <li>Optimiser: Adam, 3e-4 decaying by 0.98 every 10K steps, gradient clip 3.</li>
-  <li>Batch 32, 50K steps, one model per dataset.</li>
-  <li>Two seeds per model. Long trainings (150K, 300K steps): one seed, same settings.</li>
+  <li>Batch 32, 50K steps, one model per dataset, two seeds.</li>
 </ul>
 
 <h2>How results are reported</h2>
@@ -141,13 +94,42 @@
   <li>Loss: the training loss, one implementation for every model, of the output against the recording on fixed windows,
       averaged over the seeds: the validation takes of the MOSA sets, which no model trained on; the training recordings
       of the solo violin set, which has no validation split.</li>
-  <li>One table per training set, models as rows. A missing cell is a model still in training or a score still to come.</li>
+  <li>One table per training set, models as rows. A pending cell is a model still in training or a score still to come.</li>
 </ul>
 
-<section class="study s1">
-<h2>Study 1: the original DDSP against DDSP-Violin</h2>
+<section class="part p1">
+<h2>Part 1: the original DDSP against DDSP-Violin</h2>
 <p class="q">Do the physical constraints cost anything when both models read the audio they resynthesise?</p>
-
+<div class="model ddsp">
+<h3>DDSP</h3>
+<p>The model of Engel et al. (<a href="https://arxiv.org/abs/2001.04643">ICLR 2020</a>), run with the published code
+(<a href="https://github.com/magenta/ddsp">magenta/ddsp</a> 3.7.0, <code>solo_instrument.gin</code>).</p>
+<ul>
+  <li>Inputs: pitch and loudness. <strong>DDSP + z</strong> adds the z encoder (MFCC, GRU 512, 16 values at 125 frames per 4 s).</li>
+  <li>Decoder: one 3-layer MLP (512) per input, GRU (512), 3-layer MLP (512).</li>
+  <li>Outputs per frame: amplitude, 60 harmonic amplitudes, 65 noise-band magnitudes.</li>
+  <li>Synthesis: harmonic oscillator bank plus filtered noise.</li>
+  <li>Reverb: trainable, 3 s (48,000 samples), on the sum of harmonics and noise, dry signal added. No body filter.</li>
+</ul>
+<details><summary>Diagram</summary><img src="assets/ddsp_architecture.png" alt="DDSP autoencoder">
+<p class="muted">From Engel et al. (2020).</p></details>
+</div>
+<div class="model ours">
+<h3>DDSP-Violin</h3>
+<p>The model of our AES 2026 paper (<a href="https://github.com/JoaoerDuarte/DDSP-Violin-AES2026">code</a>).</p>
+<ul>
+  <li>Inputs: pitch, loudness and the harmonic amplitudes of the audio, read by the harmonic encoder into z&#8322;.
+      <strong>+ z</strong> adds the main z encoder as in the paper.</li>
+  <li>From z&#8322;: the brightness &alpha; and the bow position k, fed to the decoder and to the masks.</li>
+  <li>Decoder: as DDSP.</li>
+  <li>Outputs per frame: amplitude, 60 per-harmonic residuals (within &plusmn;6 dB), 65 noise-band magnitudes.</li>
+  <li>Body filter: learned, 2,048 samples, on the harmonic part.</li>
+  <li>Residual loss at weight 0.3.</li>
+  <li><strong>+ room reverb</strong>: the same trainable 3 s reverb as DDSP, on the sum of the filtered harmonics and the noise.</li>
+</ul>
+<details><summary>Diagram</summary><img src="assets/ddsp_violin_architecture.png" alt="DDSP-Violin"></details>
+</div>
+<p class="note">Longer training: the same settings continued, 150K steps on ev03 and 300K on all players, one seed.</p>
 <h4>Trained on the solo violin set (Garner)</h4>
 <table>
 <thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th>Loss</th></tr></thead>
@@ -172,6 +154,7 @@
 <tr class="ours2"><td class="m">DDSP-Violin + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.26</td></tr>
 <tr class="ours"><td class="m">DDSP-Violin + z</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_z_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.96</td></tr>
 <tr class="ours2"><td class="m">DDSP-Violin + z + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_z_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.92</td></tr>
+<tr class="group"><td colspan="4">Longer training, one seed</td></tr>
 <tr class="ddsp"><td class="m">DDSP, 150K steps</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n">6.32</td></tr>
 </tbody>
 </table>
@@ -186,6 +169,7 @@
 <tr class="ours2"><td class="m">DDSP-Violin + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.17</td></tr>
 <tr class="ours"><td class="m">DDSP-Violin + z</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_z_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_z_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.73</td></tr>
 <tr class="ours2"><td class="m">DDSP-Violin + z + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_z_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_z_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.77</td></tr>
+<tr class="group"><td colspan="5">Longer training, one seed</td></tr>
 <tr class="ddsp"><td class="m">DDSP, 300K steps</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
 </tbody>
 </table>
@@ -193,10 +177,21 @@
 it on all players; with z it beats DDSP + z on both. On the solo violin set it is lower than DDSP in both forms. The room
 reverb helps on the two small sets, not on all players. DDSP at 150K steps on ev03 is no better than at 50K.</p>
 </section>
-<section class="study s2">
-<h2>Study 2: synthesis from curves</h2>
+<section class="part p2">
+<h2>Part 2: synthesis from curves</h2>
 <p class="q">What is lost when the model reads nothing from the audio, only pitch, loudness and the measured brightness, as at synthesis from a score?</p>
-<p class="note">DDSP-Violin from curves: no encoder, k at the open position. The two reference rows repeat Study 1.</p>
+<div class="model ours">
+<h3>DDSP-Violin from curves</h3>
+<p>The synthesiser of the MIDI studies: the same model driven by curves alone, nothing read from the audio at synthesis.</p>
+<ul>
+  <li>Inputs: pitch, loudness and the brightness &alpha;, measured per frame on the recording during training, and coming
+      from the score or the performance model at synthesis. No encoder.</li>
+  <li>k: not predicted; the bow mask stays at the open position.</li>
+  <li>Decoder, outputs, body filter, residual loss and the <strong>+ room reverb</strong> variant as above.</li>
+</ul>
+<details><summary>Diagram</summary><img src="assets/ddsp_violin_curves.svg" alt="DDSP-Violin from curves"></details>
+</div>
+<p class="note">The two reference rows repeat Part 1.</p>
 <h4>Trained on the solo violin set (Garner)</h4>
 <table>
 <thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th>Loss</th></tr></thead>
@@ -230,13 +225,13 @@ reverb helps on the two small sets, not on all players. DDSP at 150K steps on ev
 <tr class="ours2"><td class="m">DDSP-Violin from curves + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n"></td></tr>
 </tbody>
 </table>
-<p class="result">First seeds: the curves model sits 0.2 to 0.3 above the model that reads the audio on the solo violin set
-and on ev03, below DDSP on the first and above it on the second. The room reverb helps it on both. All players pending.</p>
+<p class="result">First seeds: the curves model sits 0.1 to 0.3 above the model that reads the audio, below DDSP on the solo
+violin set and on all players, above it on ev03. The room reverb helps it on every set.</p>
 </section>
-<section class="study s3">
-<h2>Study 3: one change at a time on the curves model</h2>
+<section class="part p3">
+<h2>Part 3: one change at a time on the curves model</h2>
 <p class="q">Which parts of the model limit it?</p>
-<p class="note">Each row is the curves model of Study 2, without the room reverb, with one change. Parameter loss: the distance
+<p class="note">Each row is the curves model of Part 2, without the room reverb, with one change. Parameter loss: the distance
 of the harmonic levels and noise bands to the ones fitted to the recording, read from the decoder or measured on the output
 audio. One body filter per player: the player given as an input.</p>
 <h4>Trained on all MOSA players</h4>
@@ -295,9 +290,9 @@ audio. One body filter per player: the player given as an input.</p>
 <tr class="ours2"><td class="m">Aligned pYIN pitch</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
 </tbody>
 </table>
-<p class="result">All players so far: fixing the brightness at one value costs 0.8, so the measured brightness curve carries
+<p class="result">All players so far: fixing the brightness at one value costs 0.7, so the measured brightness curve carries
 information the decoder uses. Freeing the residuals helps (12 dB, loss 0), constraining them hurts (loss 1). The filter
-changes move the loss by 0.1 or less.</p>
+changes move the loss by 0.05 or less.</p>
 </section>
 
 <h2>Next</h2>
