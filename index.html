@@ -129,7 +129,8 @@ of whole takes (training 13.8 h, of which 36 min of ev03).</p>
 </ul>
 <details><summary>Diagram</summary><img src="assets/ddsp_violin_architecture.png" alt="DDSP-Violin"></details>
 </div>
-<p class="note">Longer training: the same settings continued, 150K steps on ev03 and 300K on all players, one seed.</p>
+<p class="note">DDSP always carries its 3 s reverb; the DDSP-Violin + room reverb rows add the same one, so those are the
+like-for-like pairs. Longer training: the same settings continued, 150K steps on ev03 and 300K on all players, one seed.</p>
 <h4>Trained on the solo violin set (Garner)</h4>
 <table>
 <thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th>Loss</th></tr></thead>
@@ -156,6 +157,7 @@ of whole takes (training 13.8 h, of which 36 min of ev03).</p>
 <tr class="ours2"><td class="m">DDSP-Violin + z + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_z_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.92</td></tr>
 <tr class="group"><td colspan="4">Longer training, one seed</td></tr>
 <tr class="ddsp"><td class="m">DDSP, 150K steps</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n">6.32</td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin + z + room reverb, 150K steps</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
 </tbody>
 </table>
 <h4>Trained on all MOSA players</h4>
@@ -171,6 +173,7 @@ of whole takes (training 13.8 h, of which 36 min of ev03).</p>
 <tr class="ours2"><td class="m">DDSP-Violin + z + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_z_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_z_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.77</td></tr>
 <tr class="group"><td colspan="5">Longer training, one seed</td></tr>
 <tr class="ddsp"><td class="m">DDSP, 300K steps</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin + z + room reverb, 300K steps</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
 </tbody>
 </table>
 <p class="result">On takes outside the training set, DDSP-Violin without z matches DDSP without z on one player and beats
