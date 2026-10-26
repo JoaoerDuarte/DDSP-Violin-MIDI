@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DDSP-Violin MIDI: audio examples</title>
+<title>DDSP-Violin MIDI: studies</title>
 <style>
   :root { --ddsp: #9a3412; --ddsp-bg: #ffedd5; --ours: #1e40af; --ours-bg: #dbeafe; --room: #1e3a8a; --room-bg: #bfdbfe;
           --rec: #374151; --rec-bg: #f3f4f6; --line: #e5e7eb; --line2: #cbd5e1; --muted: #6b7280;
@@ -41,14 +41,19 @@
   details { margin: 0.4em 0 0.8em; }  summary { cursor: pointer; color: #1d4ed8; }
   details img { max-width: 100%; margin-top: 0.6em; border: 1px solid var(--line); }
   ul { margin-top: 0.3em; }  li { margin: 0.15em 0; }
+  section.study { margin-top: 2.6em; padding-top: 0.2em; border-top: 4px solid var(--band); }
+  section.study h2 { border-bottom: none; margin-top: 0.6em; color: var(--band); }
+  section.s1 { --band: #475569; }  section.s2 { --band: #0f766e; }  section.s3 { --band: #6d28d9; }
+  p.q { margin-top: -0.4em; font-style: italic; color: #374151; }
+  p.note { color: var(--muted); font-size: 0.95em; }
+  p.result { border-left: 4px solid var(--band); padding-left: 0.8em; }
+  tr.group td { background: #f8fafc; color: var(--muted); font-size: 0.85em; text-align: left; padding-top: 10px; }
 </style>
 </head>
 <body>
 
-<h1>DDSP-Violin MIDI: audio examples</h1>
-<p>Listening comparisons of the models in the MIDI studies.</p>
-
-<p>First set: the original DDSP model against DDSP-Violin, trained the same way on the same recordings.</p>
+<h1>DDSP-Violin MIDI: studies</h1>
+<p>The synthesiser studies of the MIDI paper: models, data and training first, then one section per study with audio and losses.</p>
 
 <h2>Models</h2>
 <p>Three models: DDSP, DDSP-Violin as published, and DDSP-Violin driven by curves.</p>
@@ -126,22 +131,23 @@
   <li>Loss: multi-scale spectral, L1 on the magnitude and on the log magnitude, FFT sizes 2048, 1024, 512, 256, 128, 64.</li>
   <li>Optimiser: Adam, 3e-4 decaying by 0.98 every 10K steps, gradient clip 3.</li>
   <li>Batch 32, 50K steps, one model per dataset.</li>
-  <li>Extended trainings on ev03 and all players, same settings, continued until the validation loss stops falling. In progress.</li>
+  <li>Two seeds per model. Long trainings (150K, 300K steps): one seed, same settings.</li>
 </ul>
 
-<h2>Results</h2>
-<p>Levels matched to the recording. Every excerpt is the same 10 s for every row. The last column is the spectral loss
-(the training loss, one implementation for every model) of the model's output against the recording on fixed windows,
-averaged over two seeds: the validation recordings of the MOSA sets, which the models never trained on, and the training
-recordings of the solo violin set, which has no validation split.</p>
+<h2>How results are reported</h2>
+<ul>
+  <li>Audio: the first 10 s of each excerpt, level matched to the recording, from the better of the two seeds.
+      <span class="badge train">training set</span> and <span class="badge test">test set</span> say where the excerpt comes from.</li>
+  <li>Loss: the training loss, one implementation for every model, of the output against the recording on fixed windows,
+      averaged over the seeds: the validation takes of the MOSA sets, which no model trained on; the training recordings
+      of the solo violin set, which has no validation split.</li>
+  <li>One table per training set, models as rows. A missing cell is a model still in training or a score still to come.</li>
+</ul>
 
-<h3>Step one: resynthesis</h3>
-<p>Both models read the audio they resynthesise: DDSP through its z encoder, DDSP-Violin through its harmonic
-encoder (and its z encoder in the + z rows). The question is whether the physical constraints cost anything against the
-original model on the same recordings.</p>
-<p>Result: on recordings outside the training set, DDSP-Violin without z matches DDSP without z on one player and beats it
-on all players; with z it beats DDSP + z on both. On the solo violin set it is lower than DDSP in both forms. The room reverb
-helps on the two small sets and not on all players.</p>
+<section class="study s1">
+<h2>Study 1: the original DDSP against DDSP-Violin</h2>
+<p class="q">Do the physical constraints cost anything when both models read the audio they resynthesise?</p>
+
 <h4>Trained on the solo violin set (Garner)</h4>
 <table>
 <thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th>Loss</th></tr></thead>
@@ -166,6 +172,7 @@ helps on the two small sets and not on all players.</p>
 <tr class="ours2"><td class="m">DDSP-Violin + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.26</td></tr>
 <tr class="ours"><td class="m">DDSP-Violin + z</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_z_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.96</td></tr>
 <tr class="ours2"><td class="m">DDSP-Violin + z + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_z_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.92</td></tr>
+<tr class="ddsp"><td class="m">DDSP, 150K steps</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n">6.32</td></tr>
 </tbody>
 </table>
 <h4>Trained on all MOSA players</h4>
@@ -179,20 +186,26 @@ helps on the two small sets and not on all players.</p>
 <tr class="ours2"><td class="m">DDSP-Violin + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.17</td></tr>
 <tr class="ours"><td class="m">DDSP-Violin + z</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_z_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_z_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.73</td></tr>
 <tr class="ours2"><td class="m">DDSP-Violin + z + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_z_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_z_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.77</td></tr>
+<tr class="ddsp"><td class="m">DDSP, 300K steps</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
 </tbody>
 </table>
-<h3>Step two: synthesis from curves</h3>
-<p>DDSP-Violin driven by curves only: pitch, loudness and the brightness &alpha; measured on the recording, fed to the
-decoder; no encoder; k fixed at the open position. This is how the MIDI synthesiser works, with the curves coming from a
-score or a performance model instead of a recording. Against DDSP without z, which has the same inputs but the brightness.</p>
+<p class="result">On takes outside the training set, DDSP-Violin without z matches DDSP without z on one player and beats
+it on all players; with z it beats DDSP + z on both. On the solo violin set it is lower than DDSP in both forms. The room
+reverb helps on the two small sets, not on all players. DDSP at 150K steps on ev03 is no better than at 50K.</p>
+</section>
+<section class="study s2">
+<h2>Study 2: synthesis from curves</h2>
+<p class="q">What is lost when the model reads nothing from the audio, only pitch, loudness and the measured brightness, as at synthesis from a score?</p>
+<p class="note">DDSP-Violin from curves: no encoder, k at the open position. The two reference rows repeat Study 1.</p>
 <h4>Trained on the solo violin set (Garner)</h4>
 <table>
 <thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th>Loss</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/garner_double2/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td></td></tr>
 <tr class="ddsp"><td class="m">DDSP</td><td><div class="player" data-src="audio_examples/garner_double2/ddsp_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/ddsp_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.56</td></tr>
-<tr class="ours"><td class="m">DDSP-Violin from curves</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">DDSP-Violin from curves + room reverb</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin + z</td><td><div class="player" data-src="audio_examples/garner_double2/ddsp_violin_z_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/ddsp_violin_z_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.14</td></tr>
+<tr class="ours"><td class="m">DDSP-Violin from curves</td><td><div class="player" data-src="audio_examples/garner_double2/ddsp_violin_from_curves_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/ddsp_violin_from_curves_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin from curves + room reverb</td><td><div class="player" data-src="audio_examples/garner_double2/ddsp_violin_from_curves_room_reverb_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/ddsp_violin_from_curves_room_reverb_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n"></td></tr>
 </tbody>
 </table>
 <h4>Trained on one MOSA player (ev03)</h4>
@@ -201,8 +214,9 @@ score or a performance model instead of a recording. Against DDSP without z, whi
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td></td></tr>
 <tr class="ddsp"><td class="m">DDSP</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.31</td></tr>
-<tr class="ours"><td class="m">DDSP-Violin from curves</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">DDSP-Violin from curves + room reverb</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin + z</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_z_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.96</td></tr>
+<tr class="ours"><td class="m">DDSP-Violin from curves</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_from_curves_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_from_curves_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin from curves + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_from_curves_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_from_curves_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n"></td></tr>
 </tbody>
 </table>
 <h4>Trained on all MOSA players</h4>
@@ -211,41 +225,46 @@ score or a performance model instead of a recording. Against DDSP without z, whi
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td></td></tr>
 <tr class="ddsp"><td class="m">DDSP</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.62</td></tr>
-<tr class="ours"><td class="m">DDSP-Violin from curves</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">DDSP-Violin from curves + room reverb</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin + z</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_z_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_z_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_z_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">5.73</td></tr>
+<tr class="ours"><td class="m">DDSP-Violin from curves</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_from_curves_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_from_curves_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_from_curves_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">DDSP-Violin from curves + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n"></td></tr>
 </tbody>
 </table>
-<h3>Step three: one change at a time</h3>
-<p>Each row is the curves model of step two, without the room reverb, with one change. On the full set and on ev03.</p>
-<ul>
-  <li>Brightness fixed at the set median: no brightness curve, as a MIDI user without that control.</li>
-  <li>Residual loss 0 and 1 (0.3 in the base); residuals within 12 dB (6 dB in the base).</li>
-  <li>Minimum-phase body filter instead of the free one; one body filter per player, the player given as an input.</li>
-  <li>Room reverb of 0.5 s, the length of the recordings' decay.</li>
-  <li>Noise: 257 bands instead of 65; a shorter window for the noise filter.</li>
-  <li>Losses: the parameter loss (the distance of the harmonic levels and noise bands to the ones fitted to the recording)
-      added to MSSL, first read from the decoder, then measured on the output audio; MSSL with its short windows only; mel added.</li>
-  <li>Pitch from pYIN aligned to the sound instead of CREPE.</li>
-</ul>
+<p class="result">First seeds: the curves model sits 0.2 to 0.3 above the model that reads the audio on the solo violin set
+and on ev03, below DDSP on the first and above it on the second. The room reverb helps it on both. All players pending.</p>
+</section>
+<section class="study s3">
+<h2>Study 3: one change at a time on the curves model</h2>
+<p class="q">Which parts of the model limit it?</p>
+<p class="note">Each row is the curves model of Study 2, without the room reverb, with one change. Parameter loss: the distance
+of the harmonic levels and noise bands to the ones fitted to the recording, read from the decoder or measured on the output
+audio. One body filter per player: the player given as an input.</p>
 <h4>Trained on all MOSA players</h4>
 <table>
 <thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach<span class="badge test">test set</span></th><th class="ex">yv02, piece de2<span class="badge test">test set</span></th><th>Loss</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td></td></tr>
-<tr class="ours2"><td class="m">Brightness fixed at the set median</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Residual loss 0</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Residual loss 1</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Residuals within 12 dB</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Minimum-phase body filter</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Room reverb 0.5 s</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">257 noise bands</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Parameter loss added</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Parameter loss on the output audio</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">One body filter per player</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Short MSSL terms only</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Mel loss added</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Shorter noise window</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Aligned pYIN pitch</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin from curves</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_from_curves_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_from_curves_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_from_curves_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n"></td></tr>
+<tr class="group"><td colspan="5">Residuals</td></tr>
+<tr class="ours2"><td class="m">Residual loss 0</td><td><div class="player" data-src="audio_examples/ev03_train/residual_loss_0_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/residual_loss_0_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/residual_loss_0_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.21</td></tr>
+<tr class="ours2"><td class="m">Residual loss 1</td><td><div class="player" data-src="audio_examples/ev03_train/residual_loss_1_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/residual_loss_1_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/residual_loss_1_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.34</td></tr>
+<tr class="ours2"><td class="m">Residuals within 12 dB</td><td><div class="player" data-src="audio_examples/ev03_train/residuals_within_12_db_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/residuals_within_12_db_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/residuals_within_12_db_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.17</td></tr>
+<tr class="group"><td colspan="5">Brightness</td></tr>
+<tr class="ours2"><td class="m">Brightness fixed at the set median</td><td><div class="player" data-src="audio_examples/ev03_train/brightness_fixed_at_the_set_median_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/brightness_fixed_at_the_set_median_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/brightness_fixed_at_the_set_median_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">7.01</td></tr>
+<tr class="group"><td colspan="5">Filters</td></tr>
+<tr class="ours2"><td class="m">Minimum-phase body filter</td><td><div class="player" data-src="audio_examples/ev03_train/minimum_phase_body_filter_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/minimum_phase_body_filter_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/minimum_phase_body_filter_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.25</td></tr>
+<tr class="ours2"><td class="m">One body filter per player</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Room reverb 0.5 s</td><td><div class="player" data-src="audio_examples/ev03_train/room_reverb_0_5_s_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/room_reverb_0_5_s_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/room_reverb_0_5_s_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n">6.22</td></tr>
+<tr class="group"><td colspan="5">Noise</td></tr>
+<tr class="ours2"><td class="m">257 noise bands</td><td><div class="player" data-src="audio_examples/ev03_train/257_noise_bands_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/257_noise_bands_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/257_noise_bands_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Shorter noise window</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="group"><td colspan="5">Losses</td></tr>
+<tr class="ours2"><td class="m">Parameter loss added</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Parameter loss on the output audio</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Short MSSL terms only</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Mel loss added</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="group"><td colspan="5">Inputs</td></tr>
+<tr class="ours2"><td class="m">Aligned pYIN pitch</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
 </tbody>
 </table>
 <h4>Trained on one MOSA player (ev03)</h4>
@@ -253,26 +272,36 @@ score or a performance model instead of a recording. Against DDSP without z, whi
 <thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach, take 2<span class="badge test">test set</span></th><th>Loss</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td></td></tr>
-<tr class="ours2"><td class="m">Brightness fixed at the set median</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Residual loss 0</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Residual loss 1</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Residuals within 12 dB</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Minimum-phase body filter</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Room reverb 0.5 s</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">257 noise bands</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Parameter loss added</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Parameter loss on the output audio</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">One body filter per player</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Short MSSL terms only</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Mel loss added</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Shorter noise window</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
-<tr class="ours2"><td class="m">Aligned pYIN pitch</td><td><span class="muted">in training</span></td><td><span class="muted">in training</span></td><td class="n"></td></tr>
+<tr class="ours"><td class="m">DDSP-Violin from curves</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_from_curves_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_from_curves_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n"></td></tr>
+<tr class="group"><td colspan="4">Residuals</td></tr>
+<tr class="ours2"><td class="m">Residual loss 0</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Residual loss 1</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Residuals within 12 dB</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="group"><td colspan="4">Brightness</td></tr>
+<tr class="ours2"><td class="m">Brightness fixed at the set median</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="group"><td colspan="4">Filters</td></tr>
+<tr class="ours2"><td class="m">Minimum-phase body filter</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">One body filter per player</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Room reverb 0.5 s</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="group"><td colspan="4">Noise</td></tr>
+<tr class="ours2"><td class="m">257 noise bands</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Shorter noise window</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="group"><td colspan="4">Losses</td></tr>
+<tr class="ours2"><td class="m">Parameter loss added</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Parameter loss on the output audio</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Short MSSL terms only</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="ours2"><td class="m">Mel loss added</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
+<tr class="group"><td colspan="4">Inputs</td></tr>
+<tr class="ours2"><td class="m">Aligned pYIN pitch</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n"></td></tr>
 </tbody>
 </table>
+<p class="result">All players so far: fixing the brightness at one value costs 0.8, so the measured brightness curve carries
+information the decoder uses. Freeing the residuals helps (12 dB, loss 0), constraining them hurts (loss 1). The filter
+changes move the loss by 0.1 or less.</p>
+</section>
 
 <h2>Next</h2>
-<p>The extended trainings of the best models, then the final model on the other recording sets and the performance model
-from MIDI to curves.</p>
+<p>The performance model, from MIDI notes to the curves the synthesiser reads.</p>
 
 <script>
 (function () {
