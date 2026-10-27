@@ -1,10 +1,10 @@
 # DDSP-Violin MIDI
 
-Audio examples accompanying **"[paper title]"** (in preparation).
+Results page accompanying **"[paper title]"** (in preparation): audio examples and losses of the synthesiser studies.
 
-## Audio examples
+## Results
 
-Listen at [joaoerduarte.github.io/DDSP-Violin-MIDI](https://joaoerduarte.github.io/DDSP-Violin-MIDI/).
+Audio examples and losses at [joaoerduarte.github.io/DDSP-Violin-MIDI](https://joaoerduarte.github.io/DDSP-Violin-MIDI/).
 
 ## Citation
 
