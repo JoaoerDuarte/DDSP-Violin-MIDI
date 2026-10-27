@@ -291,113 +291,40 @@ movements (Corrente, four Doubles). Test: Allemanda, Sarabande.</td><td class="n
 <section class="part p3">
 <h2>Part 3: one change at a time on the curves model</h2>
 <p class="q">Which parts of the model limit it?</p>
-<p class="note">The base is the curves model with its 3 s room reverb (Part 2). Each row changes one thing.</p>
+<p class="note">The base is the curves model with its 3 s room reverb (Part 2). Each model below changes one thing and trains
+the same way, on the solo violin set, ev03 and all players, two seeds. Results come here as they land.</p>
 <ul class="changes">
   <li>Harmonic source
     <ul>
-      <li>Residual loss weight 0 instead of 0.3.</li>
-      <li>Residual loss weight 1 instead of 0.3.</li>
-      <li>Residual range &plusmn;12 dB instead of &plusmn;6 dB.</li>
+      <li>Residual loss weight 0 instead of 0.3: the per-harmonic residuals free of their penalty.</li>
+      <li>Residual loss weight 1 instead of 0.3: the residuals held close to the physical mask.</li>
+      <li>Residual range &plusmn;12 dB instead of &plusmn;6 dB: each harmonic may move twice as far from the mask.</li>
     </ul></li>
   <li>Body filter
     <ul>
-      <li>Minimum phase instead of a free filter.</li>
-      <li>One filter per player instead of one for all (all players only).</li>
+      <li>Minimum phase instead of a free 2,048-sample filter: the same magnitude response, no pre-ringing.</li>
+      <li>One filter per player instead of one for all, the player given as an input (all players only).</li>
     </ul></li>
   <li>Room reverb
     <ul>
-      <li>0.5 s instead of 3 s.</li>
+      <li>0.5 s instead of 3 s: shorter than the rooms' decay.</li>
     </ul></li>
   <li>Noise
     <ul>
-      <li>257 bands instead of 65.</li>
-      <li>A shorter window for the noise filter (planned).</li>
+      <li>257 bands instead of 65: a finer noise spectrum.</li>
+      <li>A shorter window for the noise filter's impulse response (planned).</li>
     </ul></li>
   <li>Loss
     <ul>
-      <li>The parameter loss added to the spectral loss, read from the decoder (planned).</li>
-      <li>The parameter loss added, measured on the output audio (planned).</li>
+      <li>The level loss added, weight 0.9 instead of 0: the output's loudness curve held to the recording's (planned).</li>
+      <li>The parameter loss added, read from the decoder: the harmonic levels and noise bands held to the ones fitted to the
+          recording (planned).</li>
+      <li>The parameter loss added, measured on the output audio instead of read from the decoder (planned).</li>
       <li>The spectral loss with its four short windows only, 2048 and 1024 dropped (planned).</li>
       <li>A mel term added to the spectral loss (planned).</li>
     </ul></li>
 </ul>
-<h4>Trained on the solo violin set (Garner)</h4>
-<table>
-<thead><tr><th>Model</th><th class="ex">Garner, Partita 1, Double<span class="badge train">training set</span></th><th class="ex">Garner, Partita 1, Allemanda<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
-<tbody>
-<tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/garner_double2/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_allemanda/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
-<tr class="group"><td colspan="5">Base, from Part 2</td></tr>
-<tr class="curves2"><td class="m">DDSP-Violin from curves + room reverb</td><td><div class="player" data-src="audio_examples/garner_double2/ddsp_violin_from_curves_room_reverb_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_allemanda/ddsp_violin_from_curves_room_reverb_garner.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n sep">5.27</td><td class="n">7.29</td></tr>
-<tr class="group"><td colspan="5">Harmonic source</td></tr>
-<tr class="var"><td class="m">Residual loss weight 0 (base 0.3)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Residual loss weight 1 (base 0.3)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Residual range ±12 dB (base ±6 dB)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Body filter</td></tr>
-<tr class="var"><td class="m">Body filter minimum phase (base free)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Room reverb</td></tr>
-<tr class="var"><td class="m">Room reverb 0.5 s (base 3 s)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Noise</td></tr>
-<tr class="var"><td class="m">Noise bands 257 (base 65)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Noise filter window shorter</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Loss</td></tr>
-<tr class="var"><td class="m">Loss with the parameter loss added</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Loss with the parameter loss on the output audio</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Loss with the short windows only</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Loss with a mel term added</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-</tbody>
-</table>
-<h4>Trained on one MOSA player (ev03)</h4>
-<table>
-<thead><tr><th>Model</th><th class="ex">ev03, Bach ba1, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach ba4, take 2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
-<tbody>
-<tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
-<tr class="group"><td colspan="5">Base, from Part 2</td></tr>
-<tr class="curves2"><td class="m">DDSP-Violin from curves + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_from_curves_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/ddsp_violin_from_curves_room_reverb_ev03.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n sep">5.66</td><td class="n">6.51</td></tr>
-<tr class="group"><td colspan="5">Harmonic source</td></tr>
-<tr class="var"><td class="m">Residual loss weight 0 (base 0.3)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Residual loss weight 1 (base 0.3)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Residual range ±12 dB (base ±6 dB)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Body filter</td></tr>
-<tr class="var"><td class="m">Body filter minimum phase (base free)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Room reverb</td></tr>
-<tr class="var"><td class="m">Room reverb 0.5 s (base 3 s)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Noise</td></tr>
-<tr class="var"><td class="m">Noise bands 257 (base 65)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Noise filter window shorter</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Loss</td></tr>
-<tr class="var"><td class="m">Loss with the parameter loss added</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Loss with the parameter loss on the output audio</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Loss with the short windows only</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Loss with a mel term added</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-</tbody>
-</table>
-<h4>Trained on all MOSA players</h4>
-<table>
-<thead><tr><th>Model</th><th class="ex">ev03, Bach ba1, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach ba1, take 2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
-<tbody>
-<tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
-<tr class="group"><td colspan="5">Base, from Part 2</td></tr>
-<tr class="curves2"><td class="m">DDSP-Violin from curves + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n sep">6.07</td><td class="n">6.26</td></tr>
-<tr class="group"><td colspan="5">Harmonic source</td></tr>
-<tr class="var"><td class="m">Residual loss weight 0 (base 0.3)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Residual loss weight 1 (base 0.3)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Residual range ±12 dB (base ±6 dB)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Body filter</td></tr>
-<tr class="var"><td class="m">Body filter minimum phase (base free)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Body filter one per player (base one for all)</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Room reverb</td></tr>
-<tr class="var"><td class="m">Room reverb 0.5 s (base 3 s)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Noise</td></tr>
-<tr class="var"><td class="m">Noise bands 257 (base 65)</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Noise filter window shorter</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="group"><td colspan="5">Loss</td></tr>
-<tr class="var"><td class="m">Loss with the parameter loss added</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Loss with the parameter loss on the output audio</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Loss with the short windows only</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-<tr class="var"><td class="m">Loss with a mel term added</td><td><span class="muted">planned</span></td><td><span class="muted">planned</span></td><td class="n sep"></td><td class="n"></td></tr>
-</tbody>
-</table>
-<p class="result">In training.</p>
+
 </section>
 
 <h2>Next</h2>
