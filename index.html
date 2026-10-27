@@ -59,6 +59,7 @@
   p.note, ul.note { color: var(--muted); font-size: 0.95em; }
   p.result, ul.result { border-left: 4px solid var(--band); padding-left: 0.8em; }
   ul.result { list-style: none; margin-left: 0; padding-left: 0.8em; }
+  ul.changes > li { font-weight: 600; margin-top: 0.4em; }  ul.changes ul { font-weight: 400; margin: 0.1em 0 0.2em; }
   tr.group td { background: #fff; color: var(--muted); font-size: 0.85em; text-align: left; padding: 12px 8px 2px; border-bottom: 1px solid var(--line2); }
   table { border-top: 2px solid var(--line2); }
 </style>
@@ -290,14 +291,35 @@ movements (Corrente, four Doubles). Test: Allemanda, Sarabande.</td><td class="n
 <section class="part p3">
 <h2>Part 3: one change at a time on the curves model</h2>
 <p class="q">Which parts of the model limit it?</p>
-<p class="note">One change at a time on the curves model with its room reverb, in pipeline order.</p>
-<ul>
-  <li>Harmonic source: residual loss weight 0.3, to 0 and to 1. Residual range &plusmn;6 dB, to &plusmn;12 dB.</li>
-  <li>Body filter: free, to minimum phase. One for all, to one per player (all players only).</li>
-  <li>Room reverb: 3 s, to 0.5 s.</li>
-  <li>Noise: 65 bands, to 257. Filter window, to a shorter one.</li>
-  <li>Loss: spectral, plus the parameter loss (read from the decoder, or measured on the output audio). Six window sizes, to
-      the four short ones. Spectral, plus a mel term.</li>
+<p class="note">The base is the curves model with its 3 s room reverb (Part 2). Each row changes one thing.</p>
+<ul class="changes">
+  <li>Harmonic source
+    <ul>
+      <li>Residual loss weight 0 instead of 0.3.</li>
+      <li>Residual loss weight 1 instead of 0.3.</li>
+      <li>Residual range &plusmn;12 dB instead of &plusmn;6 dB.</li>
+    </ul></li>
+  <li>Body filter
+    <ul>
+      <li>Minimum phase instead of a free filter.</li>
+      <li>One filter per player instead of one for all (all players only).</li>
+    </ul></li>
+  <li>Room reverb
+    <ul>
+      <li>0.5 s instead of 3 s.</li>
+    </ul></li>
+  <li>Noise
+    <ul>
+      <li>257 bands instead of 65.</li>
+      <li>A shorter window for the noise filter (planned).</li>
+    </ul></li>
+  <li>Loss
+    <ul>
+      <li>The parameter loss added to the spectral loss, read from the decoder (planned).</li>
+      <li>The parameter loss added, measured on the output audio (planned).</li>
+      <li>The spectral loss with its four short windows only, 2048 and 1024 dropped (planned).</li>
+      <li>A mel term added to the spectral loss (planned).</li>
+    </ul></li>
 </ul>
 <h4>Trained on the solo violin set (Garner)</h4>
 <table>
