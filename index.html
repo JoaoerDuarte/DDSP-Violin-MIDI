@@ -104,7 +104,7 @@ five movements (the Corrente and the four Doubles). Test: the other three (Allem
       <span class="badge train">training set</span> and <span class="badge test">test set</span> say where the excerpt comes from.</li>
   <li>Two losses per model, the same measure on two sets of fixed windows: the training loss (one implementation for
       every model) of the final checkpoint's output against the recording, averaged over the seeds. Training: windows of
-      the training recordings. Held out: the validation takes of the MOSA sets, the test movements of the solo violin set.</li>
+      the training recordings. Test: the validation takes of the MOSA sets, the test movements of the solo violin set.</li>
   <li>One table per training set, models as rows, colour by model family:
       <span class="legend"><span class="ddsp">DDSP</span><span class="ours">DDSP-Violin reading the audio</span><span class="curves">DDSP-Violin from curves</span><span class="var">one change on it</span></span>.
       Lighter shades are the + z and + room reverb forms. A pending cell is a model still in training or a score still to come.</li>
@@ -146,7 +146,7 @@ five movements (the Corrente and the four Doubles). Test: the other three (Allem
 Longer training: the same settings continued, 150K steps on ev03 and 300K on all players, one seed.</p>
 <h4>Trained on the solo violin set (Garner)</h4>
 <table>
-<thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th class="ex">Allemanda<span class="badge test">test set</span></th><th class="ex">Sarabande<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, held out</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th class="ex">Allemanda<span class="badge test">test set</span></th><th class="ex">Sarabande<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/garner_double2/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_allemanda/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_sarabande/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
 <tr class="group"><td colspan="7">Original DDSP</td></tr>
@@ -161,7 +161,7 @@ Longer training: the same settings continued, 150K steps on ev03 and 300K on all
 </table>
 <h4>Trained on one MOSA player (ev03)</h4>
 <table>
-<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach, take 2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, held out</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach, take 2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
 <tr class="group"><td colspan="5">Original DDSP</td></tr>
@@ -176,7 +176,7 @@ Longer training: the same settings continued, 150K steps on ev03 and 300K on all
 </table>
 <h4>Trained on all MOSA players</h4>
 <table>
-<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach<span class="badge test">test set</span></th><th class="ex">yv02, piece de2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, held out</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach<span class="badge test">test set</span></th><th class="ex">yv02, piece de2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
 <tr class="group"><td colspan="6">Original DDSP</td></tr>
@@ -192,7 +192,7 @@ Longer training: the same settings continued, 150K steps on ev03 and 300K on all
 <h3>Longer training</h3>
 <h4>Trained on one MOSA player (ev03)</h4>
 <table>
-<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach, take 2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, held out</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach, take 2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
 <tr class="group"><td colspan="5">50K steps, from the tables above</td></tr>
@@ -205,7 +205,7 @@ Longer training: the same settings continued, 150K steps on ev03 and 300K on all
 </table>
 <h4>Trained on all MOSA players</h4>
 <table>
-<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach<span class="badge test">test set</span></th><th class="ex">yv02, piece de2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, held out</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach<span class="badge test">test set</span></th><th class="ex">yv02, piece de2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
 <tr class="group"><td colspan="6">50K steps, from the tables above</td></tr>
@@ -237,7 +237,7 @@ reverb helps on the two small sets, not on all players. DDSP at 150K steps on ev
 
 <h4>Trained on the solo violin set (Garner)</h4>
 <table>
-<thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th class="ex">Allemanda<span class="badge test">test set</span></th><th class="ex">Sarabande<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, held out</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th class="ex">Allemanda<span class="badge test">test set</span></th><th class="ex">Sarabande<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/garner_double2/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_corrente/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_allemanda/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/garner_sarabande/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
 <tr class="group"><td colspan="7">Reference, from Part 1</td></tr>
@@ -250,7 +250,7 @@ reverb helps on the two small sets, not on all players. DDSP at 150K steps on ev
 </table>
 <h4>Trained on one MOSA player (ev03)</h4>
 <table>
-<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach, take 2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, held out</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach, take 2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
 <tr class="group"><td colspan="5">Reference, from Part 1</td></tr>
@@ -263,7 +263,7 @@ reverb helps on the two small sets, not on all players. DDSP at 150K steps on ev
 </table>
 <h4>Trained on all MOSA players</h4>
 <table>
-<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach<span class="badge test">test set</span></th><th class="ex">yv02, piece de2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, held out</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach<span class="badge test">test set</span></th><th class="ex">yv02, piece de2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
 <tr class="group"><td colspan="6">Reference, from Part 1</td></tr>
@@ -285,7 +285,7 @@ of the harmonic levels and noise bands to the ones fitted to the recording, read
 audio. One body filter per player: the player given as an input.</p>
 <h4>Trained on all MOSA players</h4>
 <table>
-<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach<span class="badge test">test set</span></th><th class="ex">yv02, piece de2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, held out</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev01, Bach<span class="badge test">test set</span></th><th class="ex">yv02, piece de2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
 <tr class="group"><td colspan="6">Base, from Part 2</td></tr>
@@ -314,7 +314,7 @@ audio. One body filter per player: the player given as an input.</p>
 </table>
 <h4>Trained on one MOSA player (ev03)</h4>
 <table>
-<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach, take 2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, held out</th></tr></thead>
+<thead><tr><th>Model</th><th class="ex">ev03, Bach, take 1<span class="badge train">training set</span></th><th class="ex">ev03, Bach, take 2<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
 <tbody>
 <tr class="rec"><td class="m">Recording</td><td><div class="player" data-src="audio_examples/ev03_train/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev03_test/recording.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="sep"></td><td></td></tr>
 <tr class="group"><td colspan="5">Base, from Part 2</td></tr>
