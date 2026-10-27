@@ -56,8 +56,9 @@
   section.p1 { --band: #475569; }  section.p2 { --band: #0f766e; }  section.p3 { --band: #6d28d9; }
   section.part h3 { margin-top: 1.2em; }
   p.q { margin-top: -0.4em; font-style: italic; color: #374151; }
-  p.note { color: var(--muted); font-size: 0.95em; }
-  p.result { border-left: 4px solid var(--band); padding-left: 0.8em; }
+  p.note, ul.note { color: var(--muted); font-size: 0.95em; }
+  p.result, ul.result { border-left: 4px solid var(--band); padding-left: 0.8em; }
+  ul.result { list-style: none; margin-left: 0; padding-left: 0.8em; }
   tr.group td { background: #fff; color: var(--muted); font-size: 0.85em; text-align: left; padding: 12px 8px 2px; border-bottom: 1px solid var(--line2); }
   table { border-top: 2px solid var(--line2); }
 </style>
@@ -100,16 +101,14 @@ five movements (the Corrente and the four Doubles). Test: the other three (Allem
 
 <h2>How results are reported</h2>
 <ul>
-  <li>Audio: 10 s of each excerpt, level matched to the recording, from the better of the two seeds. The models are
-      monophonic, so the MOSA excerpts are the first 10 s of the take without a double stop in its score; the solo violin
-      set has no score alignment and its excerpts start at the beginning of the movement.
+  <li>Audio: 10 s per excerpt, level matched to the recording, the better of the two seeds. MOSA excerpts: the first
+      10 s of the take, no double stop in the score. Solo violin excerpts: from the start of the movement (no score alignment).
       <span class="badge train">training set</span> and <span class="badge test">test set</span> say where the excerpt comes from.</li>
-  <li>Two losses per model, the same measure on two sets of fixed windows: the training loss (one implementation for
-      every model) of the final checkpoint's output against the recording, averaged over the seeds. Training: windows of
-      the training recordings. Test: the validation takes of the MOSA sets, the test movements of the solo violin set.</li>
-  <li>One table per training set, models as rows, colour by model family:
+  <li>Loss: the training loss, one implementation for every model, the final checkpoint, fixed windows, seeds averaged.
+      Training: windows of the training recordings. Test: the MOSA validation takes, the solo violin test movements.</li>
+  <li>Tables: one per training set, models as rows, colour by model family:
       <span class="legend"><span class="ddsp">DDSP</span><span class="ours">DDSP-Violin reading the audio</span><span class="curves">DDSP-Violin from curves</span><span class="var">one change on it</span></span>.
-      Lighter shades are the + z and + room reverb forms. A pending cell is a model still in training or a score still to come.</li>
+      Lighter shades: the + z and + room reverb forms. Pending: still in training or still to score.</li>
 </ul>
 
 <section class="part p1">
@@ -144,8 +143,10 @@ five movements (the Corrente and the four Doubles). Test: the other three (Allem
 </ul>
 <details><summary>Diagram</summary><img src="assets/ddsp_violin_architecture.png" alt="DDSP-Violin"></details>
 </div>
-<p class="note">DDSP always carries its 3 s reverb, so its like-for-like pairs are the DDSP-Violin + room reverb rows.
-Longer training: the same settings continued, 150K steps on ev03 and 300K on all players, one seed.</p>
+<ul class="note">
+  <li>DDSP always has its 3 s reverb: its like-for-like pairs are the DDSP-Violin + room reverb rows.</li>
+  <li>Longer training: the same settings, continued to 150K steps on ev03 and 300K on all players, one seed.</li>
+</ul>
 <h4>Trained on the solo violin set (Garner)</h4>
 <table>
 <thead><tr><th>Model</th><th class="ex">Double (II)<span class="badge train">training set</span></th><th class="ex">Corrente<span class="badge train">training set</span></th><th class="ex">Allemanda<span class="badge test">test set</span></th><th class="ex">Sarabande<span class="badge test">test set</span></th><th class="sep">Loss, training</th><th>Loss, test</th></tr></thead>
@@ -218,9 +219,12 @@ Longer training: the same settings continued, 150K steps on ev03 and 300K on all
 <tr class="ours2"><td class="m">DDSP-Violin + z + room reverb, 300K steps</td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td><span class="muted">pending</span></td><td class="n sep"></td><td class="n"></td></tr>
 </tbody>
 </table>
-<p class="result">On takes outside the training set, DDSP-Violin without z matches DDSP without z on one player and beats
-it on all players; with z it beats DDSP + z on both. On the solo violin set it is lower than DDSP in both forms. The room
-reverb helps on the two small sets, not on all players. DDSP at 150K steps on ev03 is no better than at 50K.</p>
+<ul class="result">
+  <li>Test loss, without z: DDSP-Violin equals DDSP on ev03, beats it on all players, trails it on the solo violin test.</li>
+  <li>Test loss, with z: DDSP-Violin beats DDSP + z on every set.</li>
+  <li>The room reverb helps on the solo violin set and ev03, not on all players.</li>
+  <li>DDSP at 150K steps on ev03: no better than at 50K on the test takes.</li>
+</ul>
 </section>
 <section class="part p2">
 <h2>Part 2: synthesis from curves</h2>
@@ -276,24 +280,23 @@ reverb helps on the two small sets, not on all players. DDSP at 150K steps on ev
 <tr class="curves2"><td class="m">DDSP-Violin from curves + room reverb</td><td><div class="player" data-src="audio_examples/ev03_train/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/ev01_test/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td><div class="player" data-src="audio_examples/yv02_test/ddsp_violin_from_curves_room_reverb_full.mp3"><button type="button" aria-label="play">▶</button><input type="range" min="0" max="1000" value="0" aria-label="position"><span class="t">0:00</span></div></td><td class="n sep">6.07</td><td class="n">6.26</td></tr>
 </tbody>
 </table>
-<p class="result">First seeds: the curves model sits 0.1 to 0.3 above the model that reads the audio, below DDSP on the solo
-violin set and on all players, above it on ev03. The room reverb helps it on every set.</p>
+<ul class="result">
+  <li>Test loss: the curves model sits 0.1 to 0.3 above DDSP-Violin reading the audio.</li>
+  <li>Against DDSP: below it on all players, above it on ev03 and on the solo violin test.</li>
+  <li>The room reverb helps it on every set.</li>
+</ul>
 </section>
 <section class="part p3">
 <h2>Part 3: one change at a time on the curves model</h2>
 <p class="q">Which parts of the model limit it?</p>
-<p class="note">Each row is the curves model of Part 2 with its room reverb, with one change, in the order of the pipeline.</p>
+<p class="note">One change at a time on the curves model with its room reverb, in pipeline order.</p>
 <ul>
-  <li>Residual loss weight: the penalty on the per-harmonic residuals that bend the physical mask. 0 lets the decoder reshape
-      the harmonics freely, 1 holds them to the mask.</li>
-  <li>Residual range: how far each harmonic may depart from the mask.</li>
-  <li>Body filter minimum phase: the learned body filter constrained to minimum phase, no pre-ringing. One per player:
-      a body filter per violin, the player given as an input, on all players only.</li>
-  <li>Room reverb 0.5 s: shorter than the rooms' decay (about 2 to 3 s).</li>
-  <li>Noise bands 257: a finer noise spectrum. Noise filter window: a shorter impulse response for the noise filter.</li>
-  <li>Parameter loss: the distance of the harmonic levels and noise bands to the ones fitted to the recording, added to the
-      spectral loss, read from the decoder or measured on the output audio. Short windows only: the spectral loss without
-      its two longest windows. Mel term: a mel-spectrogram loss added.</li>
+  <li>Harmonic source: residual loss weight 0.3, to 0 and to 1. Residual range 6 dB, to 12 dB.</li>
+  <li>Body filter: free, to minimum phase. One for all, to one per player (all players only).</li>
+  <li>Room reverb: 3 s, to 0.5 s.</li>
+  <li>Noise: 65 bands, to 257. Filter window, to a shorter one.</li>
+  <li>Loss: spectral, plus the parameter loss (read from the decoder, or measured on the output audio). Six window sizes, to
+      the four short ones. Spectral, plus a mel term.</li>
 </ul>
 <h4>Trained on the solo violin set (Garner)</h4>
 <table>
